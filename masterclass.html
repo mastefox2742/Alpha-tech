@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Masterclass</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full, .rounded-none,
+      .rounded-t-full, .rounded-t-none,
+      .rounded-r-full, .rounded-r-none,
+      .rounded-b-full, .rounded-b-none,
+      .rounded-l-full, .rounded-l-none,
+      .rounded-s-full, .rounded-s-none,
+      .rounded-e-full, .rounded-e-none,
+      .rounded-tl-full, .rounded-tl-none,
+      .rounded-tr-full, .rounded-tr-none,
+      .rounded-bl-full, .rounded-bl-none,
+      .rounded-br-full, .rounded-br-none,
+      .rounded-ss-full, .rounded-ss-none,
+      .rounded-se-full, .rounded-se-none,
+      .rounded-es-full, .rounded-es-none,
+      .rounded-ee-full, .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
+
+          --background: #FCFAF8;
+        --foreground: #0D1321;
+        --primary: #0044CC;
+        --primary-foreground: #FFFFFF;
+        --secondary: #EAE3D2;
+        --secondary-foreground: #0D1321;
+        --muted: #F3F0E8;
+        --muted-foreground: #7A7873;
+        --accent: #C5A880;
+        --accent-foreground: #FFFFFF;
+        --destructive: #EF4444;
+        --card: #FFFFFF;
+        --card-foreground: #0D1321;
+        --popover: #FFFFFF;
+        --popover-foreground: #0D1321;
+        --border: #E6E1D6;
+        --input: #FFFFFF;
+        --ring: #0044CC;
+        --chart-1: #0044CC;
+        --chart-2: #C5A880;
+        --chart-3: #EAE3D2;
+        --chart-4: #0D1321;
+        --chart-5: #F3F0E8;
+
+        --font-sans: "Montserrat";
+        --font-heading: "Playfair Display";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 0.5rem;
+      }
+
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen bg-background text-foreground">
+      <header
+        class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-border/50"
+      >
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <a href="accueil" class="flex items-center gap-3 group"
+            ><div
+              class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg"
+            >
+              <iconify-icon icon="solar:infinity-bold" class="text-xl"></iconify-icon>
+            </div>
+            <span
+              class="font-heading font-bold text-2xl tracking-wide group-hover:text-primary transition-colors"
+              >Alpha Tech</span
+            ></a
+          >
+          <nav class="hidden md:flex items-center gap-10">
+            <a
+              href="accueil"
+              class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest text-muted-foreground"
+              >Accueil</a
+            ><a
+              href="à-propos"
+              class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest text-muted-foreground"
+              >À Propos</a
+            ><a
+              href="#"
+              class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest text-primary"
+              >Masterclass</a
+            ><a
+              href="contact"
+              class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest text-muted-foreground"
+              >Contact</a
+            >
+          </nav>
+          <a
+            href="#"
+            class="hidden md:inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-primary-foreground bg-primary rounded-full hover:shadow-[0_0_20px_rgba(0,68,204,0.4)] transition-all"
+            >Accès Privé</a
+          >
+        </div>
+      </header>
+      <main class="pt-32">
+        <section class="max-w-7xl mx-auto px-6 mb-24 grid md:grid-cols-2 gap-16 items-center">
+          <div>
+            <div
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold uppercase tracking-[0.2em] mb-6"
+            >
+              Édition Exclusive 2024
+            </div>
+            <h1 class="font-heading text-5xl md:text-7xl font-bold mb-8 leading-tight">
+              Mastering Digital <span class="text-primary italic">Innovation.</span>
+            </h1>
+            <p class="text-xl text-muted-foreground mb-10 leading-relaxed">
+              Une immersion intensive de 4 semaines pour maîtriser les technologies de pointe et les
+              stratégies de leadership qui définissent le marché actuel.
+            </p>
+            <div class="flex items-center gap-8 mb-10">
+              <div class="flex flex-col">
+                <span class="text-3xl font-bold text-primary">24h</span
+                ><span class="text-xs uppercase tracking-widest text-muted-foreground"
+                  >Contenu HD</span
+                >
+              </div>
+              <div class="w-px h-10 bg-border"></div>
+              <div class="flex flex-col">
+                <span class="text-3xl font-bold text-primary">12</span
+                ><span class="text-xs uppercase tracking-widest text-muted-foreground"
+                  >Modules</span
+                >
+              </div>
+              <div class="w-px h-10 bg-border"></div>
+              <div class="flex flex-col">
+                <span class="text-3xl font-bold text-primary">Live</span
+                ><span class="text-xs uppercase tracking-widest text-muted-foreground"
+                  >Q&amp;A Sessions</span
+                >
+              </div>
+            </div>
+            <a
+              href="#enroll"
+              class="inline-flex items-center justify-center gap-4 px-10 py-5 text-lg font-medium text-primary-foreground bg-primary rounded-full shadow-2xl hover:scale-105 transition-all"
+              >S'inscrire Maintenant<iconify-icon
+                icon="solar:round-alt-arrow-right-bold-duotone"
+                class="text-2xl"
+              ></iconify-icon
+            ></a>
+          </div>
+          <div class="relative">
+            <div class="absolute inset-0 bg-primary/5 rounded-[3rem] rotate-3 scale-105"></div>
+            <div class="relative rounded-[3rem] overflow-hidden shadow-2xl border border-border">
+              <img
+                alt="Masterclass Video Preview"
+                src="https://ggrhecslgdflloszjkwl.supabase.co/storage/v1/object/public/user-assets/lBbxWKmog4O/components/wWxfnIiP1PM.png"
+                class="w-full h-full object-cover"
+              /><button class="absolute inset-0 flex items-center justify-center group">
+                <div
+                  class="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/50 group-hover:scale-110 transition-transform"
+                >
+                  <iconify-icon icon="solar:play-bold" class="text-4xl text-white"></iconify-icon>
+                </div>
+              </button>
+            </div>
+          </div>
+        </section>
+        <section class="py-24 bg-secondary">
+          <div class="max-w-7xl mx-auto px-6">
+            <div
+              class="bg-background rounded-[3rem] overflow-hidden shadow-xl flex flex-col md:flex-row"
+            >
+              <div class="md:w-1/3">
+                <img
+                  alt="Instructor"
+                  src="https://ggrhecslgdflloszjkwl.supabase.co/storage/v1/object/public/user-assets/lBbxWKmog4O/components/UeV4xdKQuNq.png"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div class="md:w-2/3 p-12 md:p-20 flex flex-col justify-center">
+                <span class="text-accent font-bold uppercase tracking-[0.3em] text-sm mb-4"
+                  >Votre Instructeur</span
+                >
+                <h2 class="font-heading text-4xl font-bold mb-6">Dr. Alexander Vance</h2>
+                <p class="text-muted-foreground text-lg leading-relaxed mb-8">
+                  Ancien architecte en chef chez plusieurs géants de la Silicon Valley, le Dr. Vance
+                  a consacré les 20 dernières années à repousser les limites du possible. Son
+                  approche pédagogique allie profondeur technique et vision stratégique pragmatique.
+                </p>
+                <div class="flex gap-6">
+                  <div class="flex items-center gap-2">
+                    <iconify-icon
+                      icon="solar:verified-check-bold"
+                      class="text-primary text-xl"
+                    ></iconify-icon
+                    ><span class="text-sm font-semibold">Expert Certifié</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <iconify-icon
+                      icon="solar:ranking-bold"
+                      class="text-primary text-xl"
+                    ></iconify-icon
+                    ><span class="text-sm font-semibold">+10k Étudiants</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="py-24 bg-background">
+          <div class="max-w-4xl mx-auto px-6">
+            <h2 class="font-heading text-4xl font-bold text-center mb-16">Programme du Cours</h2>
+            <div class="space-y-6">
+              <div
+                class="group bg-card border border-border p-8 rounded-2xl hover:border-primary/50 transition-colors"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-primary font-bold">Semaine 01</span
+                  ><span class="text-muted-foreground text-sm uppercase">6 Heures</span>
+                </div>
+                <h3 class="font-heading text-2xl font-bold mb-4">
+                  Fondations de l'Innovation de Rupture
+                </h3>
+                <p class="text-muted-foreground">
+                  Comprendre les cycles technologiques et identifier les opportunités émergentes
+                  avant le marché.
+                </p>
+              </div>
+              <div
+                class="group bg-card border border-border p-8 rounded-2xl hover:border-primary/50 transition-colors"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-primary font-bold">Semaine 02</span
+                  ><span class="text-muted-foreground text-sm uppercase">8 Heures</span>
+                </div>
+                <h3 class="font-heading text-2xl font-bold mb-4">
+                  IA &amp; Automatisation Avancée
+                </h3>
+                <p class="text-muted-foreground">
+                  Intégrer l'intelligence artificielle générative au cœur de vos processus
+                  opérationnels.
+                </p>
+              </div>
+              <div
+                class="group bg-card border border-border p-8 rounded-2xl hover:border-primary/50 transition-colors"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-primary font-bold">Semaine 03</span
+                  ><span class="text-muted-foreground text-sm uppercase">6 Heures</span>
+                </div>
+                <h3 class="font-heading text-2xl font-bold mb-4">
+                  Architecture Cloud de Nouvelle Génération
+                </h3>
+                <p class="text-muted-foreground">
+                  Concevoir des systèmes scalables, sécurisés et hautement performants pour le
+                  futur.
+                </p>
+              </div>
+              <div
+                class="group bg-card border border-border p-8 rounded-2xl hover:border-primary/50 transition-colors"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-primary font-bold">Semaine 04</span
+                  ><span class="text-muted-foreground text-sm uppercase">4 Heures</span>
+                </div>
+                <h3 class="font-heading text-2xl font-bold mb-4">
+                  Leadership &amp; Vision Stratégique
+                </h3>
+                <p class="text-muted-foreground">
+                  Inspirer vos équipes et diriger avec assurance dans un environnement incertain.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="py-24 bg-secondary/20">
+          <div class="max-w-3xl mx-auto px-6">
+            <h2 class="font-heading text-3xl font-bold text-center mb-12">Questions Fréquentes</h2>
+            <div class="space-y-4">
+              <details open class="group bg-background p-6 rounded-2xl border border-border">
+                <summary
+                  class="font-bold cursor-pointer list-none flex items-center justify-between"
+                >
+                  Quelle est la durée totale de la masterclass ?<iconify-icon
+                    icon="solar:alt-arrow-down-linear"
+                    class="group-open:rotate-180 transition-transform"
+                  ></iconify-icon>
+                </summary>
+                <p class="mt-4 text-muted-foreground">
+                  Le programme s'étend sur 4 semaines intensives, avec environ 6 heures de contenu
+                  vidéo et 2 heures de session live par semaine.
+                </p>
+              </details>
+              <details class="group bg-background p-6 rounded-2xl border border-border">
+                <summary
+                  class="font-bold cursor-pointer list-none flex items-center justify-between"
+                >
+                  Ai-je besoin de prérequis techniques ?<iconify-icon
+                    icon="solar:alt-arrow-down-linear"
+                    class="group-open:rotate-180 transition-transform"
+                  ></iconify-icon>
+                </summary>
+                <p class="mt-4 text-muted-foreground">
+                  Une compréhension de base des concepts numériques est recommandée, mais le cours
+                  est conçu pour guider aussi bien les managers que les ingénieurs.
+                </p>
+              </details>
+              <details class="group bg-background p-6 rounded-2xl border border-border">
+                <summary
+                  class="font-bold cursor-pointer list-none flex items-center justify-between"
+                >
+                  Recevrai-je une certification ?<iconify-icon
+                    icon="solar:alt-arrow-down-linear"
+                    class="group-open:rotate-180 transition-transform"
+                  ></iconify-icon>
+                </summary>
+                <p class="mt-4 text-muted-foreground">
+                  Oui, une certification officielle Alpha Tech, reconnue par nos partenaires
+                  industriels, vous sera délivrée après validation du projet final.
+                </p>
+              </details>
+            </div>
+          </div>
+        </section>
+        <section
+          id="enroll"
+          class="py-32 bg-primary text-primary-foreground text-center relative overflow-hidden"
+        >
+          <div
+            style="background-image: repeating-linear-gradient(45deg, #C5A880 0, #C5A880 1px, transparent 0, transparent 50%); background-size: 30px 30px;"
+            class="absolute inset-0 opacity-10"
+          ></div>
+          <div class="relative z-10 max-w-4xl mx-auto px-6">
+            <h2 class="font-heading text-5xl font-bold mb-8">Prenez les rênes de votre futur.</h2>
+            <p class="text-xl text-primary-foreground/80 mb-12">
+              Les places sont limitées pour garantir une expérience personnalisée de haute qualité.
+              Ne laissez pas passer cette opportunité unique.
+            </p>
+            <div
+              class="bg-white/10 backdrop-blur-md p-10 rounded-[2.5rem] border border-white/20 inline-block mb-12"
+            >
+              <div class="text-6xl font-black mb-2">
+                990€ <span class="text-2xl font-light opacity-60">HT</span>
+              </div>
+              <p class="text-sm uppercase tracking-widest text-accent font-bold">
+                Paiement unique • Accès à vie
+              </p>
+            </div>
+            <div>
+              <a
+                href="#"
+                class="inline-flex items-center justify-center gap-4 px-14 py-6 text-2xl font-bold text-primary bg-white rounded-full hover:bg-secondary transition-all shadow-2xl"
+                >Rejoindre la Masterclass</a
+              >
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer class="bg-background pt-20 pb-10 border-t border-border">
+        <div class="max-w-7xl mx-auto px-6 text-center text-muted-foreground text-sm">
+          © 2024 Alpha Tech. Tous droits réservés.
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

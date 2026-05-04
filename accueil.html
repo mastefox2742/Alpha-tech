@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accueil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full, .rounded-none,
+      .rounded-t-full, .rounded-t-none,
+      .rounded-r-full, .rounded-r-none,
+      .rounded-b-full, .rounded-b-none,
+      .rounded-l-full, .rounded-l-none,
+      .rounded-s-full, .rounded-s-none,
+      .rounded-e-full, .rounded-e-none,
+      .rounded-tl-full, .rounded-tl-none,
+      .rounded-tr-full, .rounded-tr-none,
+      .rounded-bl-full, .rounded-bl-none,
+      .rounded-br-full, .rounded-br-none,
+      .rounded-ss-full, .rounded-ss-none,
+      .rounded-se-full, .rounded-se-none,
+      .rounded-es-full, .rounded-es-none,
+      .rounded-ee-full, .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
+
+          --background: #FCFAF8;
+        --foreground: #0D1321;
+        --primary: #0044CC;
+        --primary-foreground: #FFFFFF;
+        --secondary: #EAE3D2;
+        --secondary-foreground: #0D1321;
+        --muted: #F3F0E8;
+        --muted-foreground: #7A7873;
+        --accent: #C5A880;
+        --accent-foreground: #FFFFFF;
+        --destructive: #EF4444;
+        --card: #FFFFFF;
+        --card-foreground: #0D1321;
+        --popover: #FFFFFF;
+        --popover-foreground: #0D1321;
+        --border: #E6E1D6;
+        --input: #FFFFFF;
+        --ring: #0044CC;
+        --chart-1: #0044CC;
+        --chart-2: #C5A880;
+        --chart-3: #EAE3D2;
+        --chart-4: #0D1321;
+        --chart-5: #F3F0E8;
+
+        --font-sans: "Montserrat";
+        --font-heading: "Playfair Display";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 0.5rem;
+      }
+
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground"
+    >
+      <header
+        class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-border/50 transition-all duration-300"
+      >
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <a href="#" class="flex items-center gap-3 group"
+            ><div
+              class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20"
+            >
+              <iconify-icon icon="solar:infinity-bold" class="text-xl"></iconify-icon>
+            </div>
+            <span
+              class="font-heading font-bold text-2xl tracking-wide group-hover:text-primary transition-colors"
+              >Alpha Tech</span
+            ></a
+          >
+          <nav class="hidden md:flex items-center gap-10">
+            <a
+              href="#"
+              class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest text-primary"
+              >Accueil</a
+            ><a
+              href="#"
+              class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest text-muted-foreground"
+              >À Propos</a
+            ><a
+              href="#"
+              class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest text-muted-foreground"
+              >Masterclass</a
+            ><a
+              href="#"
+              class="text-sm font-medium hover:text-primary transition-colors uppercase tracking-widest text-muted-foreground"
+              >Contact</a
+            >
+          </nav>
+          <a
+            href="#"
+            class="hidden md:inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-primary-foreground bg-primary rounded-full hover:shadow-[0_0_20px_rgba(0,68,204,0.4)] transition-all"
+            >Accès Privé</a
+          ><button class="md:hidden text-2xl text-foreground">
+            <iconify-icon icon="solar:hamburger-menu-line-duotone"></iconify-icon>
+          </button>
+        </div>
+      </header>
+      <main>
+        <section
+          class="relative pt-32 pb-24 md:pt-48 md:pb-32 overflow-hidden flex flex-col items-center justify-center min-h-[90vh]"
+        >
+          <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] bg-primary/10 rounded-full blur-[100px] pointer-events-none"
+          ></div>
+          <div
+            class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none"
+          ></div>
+          <div class="max-w-5xl mx-auto px-6 relative z-20 text-center flex flex-col items-center">
+            <div
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold uppercase tracking-[0.2em] mb-8"
+            >
+              <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>Une nouvelle ère
+              d'innovation
+            </div>
+            <h1
+              class="font-heading text-6xl md:text-8xl font-black leading-[1.1] tracking-tight mb-8"
+            >
+              L'Excellence n'est <br /><span class="italic font-light text-primary"
+                >plus une option.</span
+              >
+            </h1>
+            <p
+              class="text-lg md:text-2xl text-muted-foreground max-w-2xl font-light mb-14 leading-relaxed"
+            >
+              Découvrez la quintessence de la technologie et propulsez votre carrière vers des
+              sommets inédits grâce à notre expertise d'élite.
+            </p>
+            <a
+              href="#"
+              class="group relative inline-flex items-center justify-center gap-4 px-12 py-6 text-xl font-medium text-primary-foreground bg-primary rounded-full overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_80px_-15px_rgba(0,68,204,0.6)]"
+              ><div
+                class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"
+              ></div>
+              <span class="tracking-wide">Participer à la Masterclass</span
+              ><iconify-icon
+                icon="solar:arrow-right-line-duotone"
+                class="text-2xl group-hover:translate-x-1 transition-transform"
+              ></iconify-icon
+            ></a>
+          </div>
+          <div class="mt-20 w-full max-w-4xl mx-auto px-6 relative z-10">
+            <img
+              alt="Innovation Technologique"
+              src="https://ggrhecslgdflloszjkwl.supabase.co/storage/v1/object/public/user-assets/lBbxWKmog4O/components/NvnabfGzyVH.png"
+              class="w-full h-auto object-contain opacity-90 drop-shadow-2xl mix-blend-multiply"
+            />
+          </div>
+        </section>
+        <section class="py-24 bg-background">
+          <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">
+                Redéfinir le possible, <br />avec élégance.
+              </h2>
+              <div class="w-20 h-1 bg-accent mb-8"></div>
+              <p class="text-muted-foreground text-lg leading-relaxed mb-6">
+                Chez Alpha Tech, nous concevons des solutions qui ne se contentent pas de suivre
+                l'évolution technologique, elles la dictent. Notre vision est simple : rendre
+                l'innovation complexe accessible, luxueuse et incomparablement performante.
+              </p>
+              <a
+                href="#"
+                class="inline-flex items-center gap-2 text-primary font-semibold uppercase tracking-wider hover:gap-4 transition-all"
+                >Découvrir notre histoire
+                <iconify-icon icon="solar:arrow-right-outline"></iconify-icon
+              ></a>
+            </div>
+            <div class="relative">
+              <div
+                class="absolute inset-0 bg-secondary/50 rounded-3xl -rotate-6 scale-105 origin-center"
+              ></div>
+              <div class="relative bg-secondary p-12 rounded-3xl shadow-xl border border-border/50">
+                <iconify-icon
+                  icon="solar:cup-star-bold-duotone"
+                  class="text-5xl text-accent mb-6"
+                ></iconify-icon>
+                <h3 class="font-heading text-2xl font-bold mb-4">La Promesse Alpha</h3>
+                <p class="text-secondary-foreground/80 leading-relaxed">
+                  Nous fusionnons la rigueur de l'ingénierie avancée avec la sophistication d'un
+                  design de classe mondiale, créant ainsi des expériences numériques sans précédent.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="py-24 bg-secondary">
+          <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20">
+              <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">Un Avantage Décisif</h2>
+              <p class="text-secondary-foreground/70 max-w-2xl mx-auto text-lg">
+                Rejoignez un écosystème conçu pour les leaders et les visionnaires.
+              </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+              <div
+                class="bg-card p-10 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-border/30 group"
+              >
+                <div
+                  class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-primary transition-all duration-300"
+                >
+                  <iconify-icon
+                    icon="solar:crown-bold-duotone"
+                    class="text-3xl text-primary group-hover:text-primary-foreground transition-colors"
+                  ></iconify-icon>
+                </div>
+                <h3 class="font-heading text-2xl font-bold mb-4">Savoir d'Élite</h3>
+                <p class="text-muted-foreground leading-relaxed">
+                  Des stratégies et des connaissances jusqu'ici réservées aux cercles les plus
+                  fermés de l'industrie technologique.
+                </p>
+              </div>
+              <div
+                class="bg-card p-10 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-border/30 group"
+              >
+                <div
+                  class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-primary transition-all duration-300"
+                >
+                  <iconify-icon
+                    icon="solar:rocket-bold-duotone"
+                    class="text-3xl text-primary group-hover:text-primary-foreground transition-colors"
+                  ></iconify-icon>
+                </div>
+                <h3 class="font-heading text-2xl font-bold mb-4">Croissance Accélérée</h3>
+                <p class="text-muted-foreground leading-relaxed">
+                  Des méthodes éprouvées pour propulser vos projets à une vitesse fulgurante tout en
+                  conservant une qualité irréprochable.
+                </p>
+              </div>
+              <div
+                class="bg-card p-10 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-border/30 group"
+              >
+                <div
+                  class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-primary transition-all duration-300"
+                >
+                  <iconify-icon
+                    icon="solar:users-group-two-rounded-bold-duotone"
+                    class="text-3xl text-primary group-hover:text-primary-foreground transition-colors"
+                  ></iconify-icon>
+                </div>
+                <h3 class="font-heading text-2xl font-bold mb-4">Réseau Exclusif</h3>
+                <p class="text-muted-foreground leading-relaxed">
+                  Accédez à une communauté triée sur le volet, composée d'esprits brillants et
+                  d'innovateurs partageant votre ambition.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="relative py-32 bg-primary text-primary-foreground overflow-hidden">
+          <div
+            style="background-image: repeating-linear-gradient(45deg, #C5A880 0, #C5A880 1px, transparent 0, transparent 50%); background-size: 20px 20px;"
+            class="absolute inset-0 opacity-10"
+          ></div>
+          <div class="relative z-10 max-w-5xl mx-auto px-6 text-center">
+            <iconify-icon
+              icon="boxicons:quote-left"
+              class="text-6xl text-accent/50 mb-8"
+            ></iconify-icon>
+            <h2 class="font-heading text-3xl md:text-5xl font-light italic leading-relaxed mb-12">
+              "La masterclass d'Alpha Tech n'est pas qu'une formation. C'est une révélation qui a
+              redéfini notre vision de l'innovation et catapulté nos résultats."
+            </h2>
+            <div class="flex items-center justify-center gap-4">
+              <img
+                alt="Éléonore Moreau"
+                src="https://randomuser.me/api/portraits/women/44.jpg"
+                class="w-16 h-16 rounded-full border-2 border-accent object-cover"
+              />
+              <div class="text-left">
+                <h4 class="font-bold text-lg">Éléonore Moreau</h4>
+                <p class="text-primary-foreground/70 text-sm tracking-wide uppercase">
+                  Directrice de l'Innovation, Nexus Corp
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer class="bg-background pt-20 pb-10 border-t border-border">
+        <div class="max-w-7xl mx-auto px-6">
+          <div class="grid md:grid-cols-4 gap-12 mb-16">
+            <div class="md:col-span-2">
+              <a href="#" class="flex items-center gap-3 mb-6"
+                ><div
+                  class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground"
+                >
+                  <iconify-icon icon="solar:infinity-bold" class="text-sm"></iconify-icon>
+                </div>
+                <span class="font-heading font-bold text-xl tracking-wide">Alpha Tech</span></a
+              >
+              <p class="text-muted-foreground max-w-sm">
+                L'excellence technologique au service de ceux qui osent façonner l'avenir.
+              </p>
+            </div>
+            <div>
+              <h4 class="font-heading font-bold text-lg mb-6">Navigation</h4>
+              <ul class="space-y-4">
+                <li>
+                  <a href="#" class="text-muted-foreground hover:text-primary transition-colors"
+                    >Accueil</a
+                  >
+                </li>
+                <li>
+                  <a href="#" class="text-muted-foreground hover:text-primary transition-colors"
+                    >À Propos</a
+                  >
+                </li>
+                <li>
+                  <a href="#" class="text-muted-foreground hover:text-primary transition-colors"
+                    >Masterclass</a
+                  >
+                </li>
+                <li>
+                  <a href="#" class="text-muted-foreground hover:text-primary transition-colors"
+                    >Contact</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-heading font-bold text-lg mb-6">Légal</h4>
+              <ul class="space-y-4">
+                <li>
+                  <a href="#" class="text-muted-foreground hover:text-primary transition-colors"
+                    >Mentions légales</a
+                  >
+                </li>
+                <li>
+                  <a href="#" class="text-muted-foreground hover:text-primary transition-colors"
+                    >Politique de confidentialité</a
+                  >
+                </li>
+                <li>
+                  <a href="#" class="text-muted-foreground hover:text-primary transition-colors"
+                    >Conditions générales</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div
+            class="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4"
+          >
+            <p class="text-muted-foreground text-sm">© 2024 Alpha Tech. Tous droits réservés.</p>
+            <div class="flex gap-4">
+              <a href="#" class="text-muted-foreground hover:text-primary transition-colors text-xl"
+                ><iconify-icon icon="mdi:linkedin"></iconify-icon></a
+              ><a
+                href="#"
+                class="text-muted-foreground hover:text-primary transition-colors text-xl"
+                ><iconify-icon icon="mdi:twitter"></iconify-icon></a
+              ><a
+                href="#"
+                class="text-muted-foreground hover:text-primary transition-colors text-xl"
+                ><iconify-icon icon="mdi:instagram"></iconify-icon
+              ></a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

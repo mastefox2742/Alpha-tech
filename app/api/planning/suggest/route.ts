@@ -1,0 +1,64 @@
+import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
+
+let client: Anthropic | null = null;
+
+function getClient() {
+  if (!client) {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY non configurée');
+    }
+    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return client;
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const { meetingTitle, pendingActions, previousMeetings } = await req.json();
+
+    const aiClient = getClient();
+
+    const prompt = `Tu es l'assistante IA d'Alpha tech, une plateforme de gestion d'événements.
+
+La réunion s'appelle : "${meetingTitle}"
+
+Réunions précédentes : ${previousMeetings.length > 0 ? previousMeetings.join(', ') : 'Aucune'}
+
+Actions en attente depuis les dernières réunions :
+${pendingActions.length > 0 ? pendingActions.map((a: string) => `- ${a}`).join('\n') : '- Aucune action en attente'}
+
+Génère un ordre du jour adapté pour cette réunion. Réponds UNIQUEMENT avec un JSON valide :
+{
+  "agenda": [
+    "Point 1 de l'ordre du jour",
+    "Point 2 de l'ordre du jour",
+    "Point 3 de l'ordre du jour"
+  ]
+}
+
+Règles :
+- Maximum 7 points
+- Commence par un tour de table rapide si c'est une réunion d'équipe
+- Inclure le suivi des actions en attente si il y en a
+- Finir par "Prochaines étapes et clôture"
+- Les points doivent être concrets et actionnables
+- Réponds UNIQUEMENT avec le JSON valide`;
+
+    const response = await aiClient.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+
+    return NextResponse.json(parsed);
+  } catch (error: unknown) {
+    console.error('Planning suggestion error:', error);
+    const message = error instanceof Error ? error.message : 'Erreur inconnue';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

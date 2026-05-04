@@ -1,0 +1,359 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// firestore.rules
+// Règles de sécurité Firestore — Production-grade, Zero-Trust.
+//
+// PRINCIPE :
+//   - Tout est INTERDIT par défaut (deny-all).
+//   - On n'autorise que ce qui est EXPLICITEMENT permis.
+//   - Chaque règle vérifie : 1) authentification, 2) rôle (Custom Claims),
+//     3) appartenance des données, 4) intégrité du payload.
+//
+// DÉPLOIEMENT :
+//   firebase deploy --only firestore:rules
+// ─────────────────────────────────────────────────────────────────────────────
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // FONCTIONS HELPERS — Réutilisées dans toutes les règles
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // ── Authentification ────────────────────────────────────────────────────
+
+    /// Vérifie qu'un JWT valide est présent. C'est la base de TOUTE règle.
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    /// Extrait le rôle. Fallback sur la base de données si aucun claim n'est défini.
+    function getUserRole() {
+      return request.auth.token.get('role', (
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) ?
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role : 'client'
+      ));
+    }
+
+    /// Vérifie que l'utilisateur a au moins le rôle requis.
+    function hasRole(role) {
+      return isAuthenticated() && getUserRole() == role;
+    }
+
+    /// Admin : droits totaux sur toutes les opérations.
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    /// Staff : peut lire et écrire les données opérationnelles.
+    function isStaff() {
+      return isAuthenticated() && (getUserRole() == 'staff' || getUserRole() == 'admin');
+    }
+
+    /// Team : accès lecture seule aux données publiées (membres, réunions).
+    function isTeam() {
+      return isAuthenticated() && (
+        getUserRole() == 'team' ||
+        getUserRole() == 'staff' ||
+        getUserRole() == 'admin'
+      );
+    }
+
+    /// EventViewer : accès lecture seule à la plupart des données (dashboards).
+    function isEventViewer() {
+      return isAuthenticated() && (
+        getUserRole() == 'client' ||
+        getUserRole() == 'team' ||
+        getUserRole() == 'staff' ||
+        getUserRole() == 'admin'
+      );
+    }
+
+    // ── Propriété des données ───────────────────────────────────────────────
+
+    /// L'utilisateur est l'auteur du document.
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    /// Le champ 'createdBy' correspond à l'utilisateur courant.
+    function isDocumentOwner() {
+      return isAuthenticated() && resource.data.get('createdBy', null) == request.auth.uid;
+    }
+
+    // ── Validation du payload (intégrité des données entrantes) ────────────
+
+    /// Les champs requis sont présents et du bon type.
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    /// L'utilisateur ne peut pas modifier des champs système.
+    function doesNotModifySystemFields() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'createdBy', 'createdAt', 'id'
+      ]);
+    }
+
+    /// Validation du champ eventId (doit correspondre à un événement existant).
+    function isValidEventId(eventId) {
+      return eventId is string && eventId.size() > 0 && eventId.size() < 50;
+    }
+
+    /// Valide un montant financier (positif, raisonnable).
+    function isValidAmount(amount) {
+      return amount is number && amount >= 0 && amount <= 10000000; // max 10M FCFA
+    }
+
+    /// Valide une quantité de billets.
+    function isValidQuantity(qty) {
+      return qty is int && qty >= 1 && qty <= 500;
+    }
+
+    // ── Rate limiting (protection brute force) ──────────────────────────────
+    // Note : Firestore Rules ne font pas de vrai rate-limit.
+    // Pour un vrai rate-limit, utiliser Cloud Functions.
+    // Ces règles limitent seulement la taille des opérations en lot.
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // RÈGLE GLOBALE : TOUT EST INTERDIT PAR DÉFAUT
+    // Ne jamais écrire `allow read, write: if true;`
+    // ═══════════════════════════════════════════════════════════════════════
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : users
+    // Profils utilisateurs — créés par Cloud Function lors de l'inscription.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    match /users/{userId} {
+
+      /// Tout le monde (client inclus) peut voir l'équipe.
+      allow read: if isOwner(userId) || isEventViewer();
+
+      /// Un utilisateur peut mettre à jour son propre profil,
+      /// SAUF les champs système (role, uid, email, createdAt).
+      /// Un admin peut tout mettre à jour.
+      allow update: if (isOwner(userId)
+        && doesNotModifySystemFields()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'role', 'uid', 'email', 'createdAt', 'disabled'
+        ])) || isAdmin() || (
+        isOwner(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role'])
+        && (
+           (request.resource.data.role == 'admin' && (request.auth.token.get('email', '') == 'fresneilm139@gmail.com' || request.auth.token.get('email', '') == 'zlatobambi@gmail.com' || request.auth.token.get('email', '').matches('.*@admin\\.alpha\\.com')))
+           || (request.resource.data.role == 'staff' && request.auth.token.get('email', '').matches('.*@staff\\.alpha\\.com'))
+        )
+      );
+
+      /// Création : autorisée pour son propre profil. On empêche l'escalade de privilèges.
+      allow create: if isOwner(userId) && (
+        request.resource.data.role == 'client' || 
+        (request.resource.data.role == 'admin' && (request.auth.token.get('email', '') == 'fresneilm139@gmail.com' || request.auth.token.get('email', '') == 'zlatobambi@gmail.com' || request.auth.token.get('email', '').matches('.*@admin\\.alpha\\.com'))) ||
+        (request.resource.data.role == 'staff' && request.auth.token.get('email', '').matches('.*@staff\\.alpha\\.com'))
+      );
+
+      /// Suppression : uniquement admin.
+      allow delete: if isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : events
+    // Événements (masterclasses). Lecture pour toute l'équipe, écriture admin.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    match /events/{eventId} {
+
+      /// Toute l'équipe et le client peuvent consulter les événements.
+      allow read: if isEventViewer();
+
+      /// Seul un admin peut créer/modifier/supprimer un événement.
+      allow create: if isAdmin()
+        && hasRequiredFields(['name', 'date', 'location', 'budgetTotal', 'ticketTarget', 'createdBy'])
+        && request.resource.data.createdBy == request.auth.uid
+        && isValidAmount(request.resource.data.budgetTotal)
+        && request.resource.data.ticketTarget is int
+        && request.resource.data.ticketTarget > 0;
+
+      allow update: if isAdmin()
+        && doesNotModifySystemFields();
+
+      allow delete: if isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : ticketSales
+    // Ventes de billets. Créées par Cloud Function uniquement.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    match /ticketSales/{ticketId} {
+
+      /// Staff, admin et client peuvent lire les ventes.
+      allow read: if isEventViewer() || isStaff();
+
+      /// CRÉATION : interdite directement depuis le client.
+      /// Doit passer par la Cloud Function 'createTicketSale'
+      /// qui valide le stock, le prix et les droits avant d'écrire.
+      allow create: if false;
+
+      /// MISE À JOUR : staff peut uniquement annuler (status → 'cancelled').
+      /// Impossible de modifier le montant, la quantité ou l'acheteur.
+      allow update: if isStaff()
+        && resource.data.status == 'active'
+        && request.resource.data.status == 'cancelled'
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'type', 'quantity', 'unitPrice', 'total', 'buyerEmail', 'eventId', 'createdBy', 'createdAt'
+        ]);
+
+      /// SUPPRESSION : interdite pour garantir l'auditabilité.
+      /// On annule, on ne supprime pas.
+      allow delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : expenses
+    // Dépenses. Saisies par staff, validées par admin.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    match /expenses/{expenseId} {
+
+      allow read: if isEventViewer() || isStaff();
+
+      allow create: if isStaff()
+        && hasRequiredFields(['description', 'amount', 'category', 'paidBy', 'date', 'eventId', 'createdBy'])
+        && request.resource.data.createdBy == request.auth.uid
+        && isValidAmount(request.resource.data.amount)
+        && isValidEventId(request.resource.data.eventId)
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() <= 200;
+
+      /// Staff peut modifier ses propres dépenses si elles ne sont pas validées.
+      /// Admin peut tout modifier.
+      allow update: if (
+          isDocumentOwner()
+          && resource.data.get('validated', false) == false
+          && doesNotModifySystemFields()
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['validated', 'validatedBy'])
+        ) || isAdmin();
+
+      /// Seul admin peut supprimer.
+      allow delete: if isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : meetings
+    // Réunions et comptes rendus. Lecture équipe, écriture staff.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    match /meetings/{meetingId} {
+
+      allow read: if isEventViewer();
+
+      allow create: if isStaff()
+        && hasRequiredFields(['title', 'date', 'time', 'location', 'participants', 'agenda', 'status', 'eventId', 'createdBy'])
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.status == 'scheduled'
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0;
+
+      allow update: if isStaff()
+        && doesNotModifySystemFields();
+
+      allow delete: if isAdmin();
+
+      // ── Sous-collection : actions ──────────────────────────────────────────
+
+      match /actions/{actionId} {
+
+        allow read: if isEventViewer();
+
+        allow create: if isStaff()
+          && hasRequiredFields(['description', 'assignedTo', 'dueDate', 'completed', 'createdBy'])
+          && request.resource.data.completed == false;
+
+        /// Toute l'équipe peut marquer une action comme complétée.
+        /// Mais seul staff peut modifier les champs principaux.
+        allow update: if (
+          isTeam()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['completed', 'completedAt', 'completedBy'])
+        ) || (
+          isStaff()
+          && doesNotModifySystemFields()
+        );
+
+        allow delete: if isAdmin();
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : revenues
+    // Revenus hors billets (sponsors, partenaires). Admin only pour l'écriture.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    match /revenues/{revenueId} {
+
+      allow read: if isEventViewer() || isStaff();
+
+      allow create: if isAdmin()
+        && hasRequiredFields(['description', 'amount', 'type', 'date', 'eventId', 'createdBy'])
+        && request.resource.data.createdBy == request.auth.uid
+        && isValidAmount(request.resource.data.amount);
+
+      allow update: if isAdmin() && doesNotModifySystemFields();
+      allow delete: if isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : auditLogs
+    // Journal d'audit immuable. Lecture admin seulement, jamais supprimé.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    match /auditLogs/{logId} {
+
+      /// Seul admin peut consulter les logs d'audit.
+      allow read: if isAdmin();
+
+      /// Les logs sont créés UNIQUEMENT par les Cloud Functions (Admin SDK).
+      /// Aucun client ne peut écrire dans cette collection.
+      allow create, update, delete: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : systemConfig
+    // Configuration globale. Lecture-seule pour l'équipe.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    match /systemConfig/{configId} {
+
+      allow read: if isEventViewer();
+      allow write: if isAdmin();
+    }
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : registrations
+    // Inscriptions publiques à la masterclass
+    // ═══════════════════════════════════════════════════════════════════════
+    match /registrations/{registrationId} {
+      allow create: if hasRequiredFields(['firstName', 'lastName', 'email', 'createdAt'])
+        && request.resource.data.firstName is string && request.resource.data.firstName.size() > 0 && request.resource.data.firstName.size() <= 100
+        && request.resource.data.lastName is string && request.resource.data.lastName.size() > 0 && request.resource.data.lastName.size() <= 100
+        && request.resource.data.email is string && request.resource.data.email.matches('^[^@]+@[^@]+\\.[^@]+$')
+        && request.resource.data.createdAt == request.time;
+      
+      allow read, update, delete: if isStaff();
+    }
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : event_config
+    // Configuration publique de l'événement (comme teamsLink)
+    // ═══════════════════════════════════════════════════════════════════════
+    match /event_config/{configId} {
+      allow read: if true; // Publique car affichée sur la page d'inscription !
+      allow write: if isStaff();
+    }
+  }
+}
