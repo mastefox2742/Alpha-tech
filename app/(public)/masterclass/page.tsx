@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Play, ArrowRightCircle, CheckCircle2, BarChart2, ChevronDown } from "lucide-react";
+import { Play, ArrowRightCircle, CheckCircle2, ChevronDown } from "lucide-react";
 
 export default function Masterclass() {
   return (
@@ -19,7 +19,7 @@ export default function Masterclass() {
           </p>
           <div className="flex flex-wrap items-center justify-between sm:justify-start gap-4 sm:gap-8 mb-10">
             <div className="flex flex-col">
-              <span className="text-3xl font-bold text-primary">2h</span>
+              <span className="text-3xl font-bold text-primary">3h</span>
               <span className="text-xs uppercase tracking-widest text-muted-foreground">
                 De Session Live
               </span>
@@ -64,47 +64,10 @@ export default function Masterclass() {
         </div>
       </section>
 
-      <section className="py-24 bg-secondary">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="bg-background rounded-[3rem] overflow-hidden shadow-xl flex flex-col md:flex-row">
-            <div className="md:w-1/3">
-              <img
-                alt="Instructors"
-                src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="md:w-2/3 p-8 md:p-12 lg:p-20 flex flex-col justify-center">
-              <span className="text-accent font-bold uppercase tracking-[0.3em] text-sm mb-4">
-                Le Panel
-              </span>
-              <h2 className="font-heading text-3xl sm:text-4xl font-bold mb-6">
-                4 Intervenants Experts
-              </h2>
-              <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-                Ne vous contentez pas d'un seul point de vue. Rejoignez 4 professionnels
-                engagés pour une session de 2 heures riche en retours d'expérience, 
-                stratégies d'innovation et échanges sur les défis de notre époque.
-              </p>
-              <div className="flex gap-6">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-semibold">Profils Complémentaires</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <BarChart2 className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-semibold">Conseils Stratégiques</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="py-24 bg-background">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="font-heading text-4xl font-bold text-center mb-16">
-            L'Essentiel en 2 Heures
+            L'Essentiel en 3 Heures
           </h2>
           <div className="space-y-6">
             <div className="group bg-card border border-border p-8 rounded-2xl hover:border-primary/50 transition-colors">
@@ -155,7 +118,7 @@ export default function Masterclass() {
                 <ChevronDown className="w-5 h-5 group-open:rotate-180 transition-transform" />
               </summary>
               <p className="mt-4 text-muted-foreground">
-                La session dure 2 heures au total, rythmée par différentes interventions et suivie d'un temps d'échange de 30 minutes via Microsoft Teams.
+                La session dure 3 heures au total, rythmée par différentes interventions et suivie d'un temps d'échange de 30 minutes via Microsoft Teams.
               </p>
             </details>
             <details className="group bg-background p-6 rounded-2xl border border-border">

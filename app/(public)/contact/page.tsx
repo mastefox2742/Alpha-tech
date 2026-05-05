@@ -24,7 +24,7 @@ export default function Contact() {
             </div>
             <h3 className="font-heading font-bold text-xl mb-2">Email</h3>
             <p className="text-muted-foreground text-sm">
-              contact@alphatech-congo.com
+              atechstartup683@gmail.com
             </p>
           </div>
           <div className="bg-card backdrop-blur-md border border-border p-8 rounded-3xl text-center flex flex-col items-center">
@@ -32,7 +32,7 @@ export default function Contact() {
               <Phone className="w-6 h-6 text-primary" />
             </div>
             <h3 className="font-heading font-bold text-xl mb-2">Téléphone</h3>
-            <p className="text-muted-foreground text-sm">+242 06 000 00 00</p>
+            <p className="text-muted-foreground text-sm">+242 066 469 382</p>
           </div>
           <div className="bg-card backdrop-blur-md border border-border p-8 rounded-3xl text-center flex flex-col items-center">
             <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-6">
