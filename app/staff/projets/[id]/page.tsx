@@ -105,6 +105,7 @@ export default function ProjetDetailPage() {
   }
 
   async function getAiSuggestion() {
+    if (!form) return;
     setAiLoading(true);
     setAiSuggestion('');
     try {
