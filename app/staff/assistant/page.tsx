@@ -122,17 +122,19 @@ Réponds toujours en français, de manière claire et utile. Tu peux utiliser du
     }
   }
 
+  function renderLine(line: string, i: number) {
+    const parts = line.replace(/\r/g, '').split(/\*\*(.*?)\*\*/g);
+    const nodes = parts.map((part, j) =>
+      j % 2 === 1 ? <strong key={j}>{part}</strong> : part
+    );
+    if (line.startsWith('- ') || line.startsWith('• ')) {
+      return <li key={i} className="ml-4">{nodes}</li>;
+    }
+    return <p key={i} className={line === '' ? 'h-2' : ''}>{nodes}</p>;
+  }
+
   function renderContent(content: string) {
-    // Simple markdown-ish rendering
-    return content
-      .split('\n')
-      .map((line, i) => {
-        const bold = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        if (line.startsWith('- ') || line.startsWith('• ')) {
-          return <li key={i} className="ml-4" dangerouslySetInnerHTML={{ __html: bold.slice(2) }} />;
-        }
-        return <p key={i} className={line === '' ? 'h-2' : ''} dangerouslySetInnerHTML={{ __html: bold }} />;
-      });
+    return content.split('\n').map((line, i) => renderLine(line, i));
   }
 
   return (

@@ -73,8 +73,8 @@ async function extractAuthUser(user: User): Promise<AuthUser> {
          role = userDoc.data()?.role ?? 'client';
          
          let expectedRole = role;
-         if (user.email && user.email.endsWith('@admin.alpha.com')) expectedRole = 'admin';
-         else if (user.email && user.email.endsWith('@staff.alpha.com')) expectedRole = 'staff';
+         if (user.email && user.email.endsWith('@admin.alpha.com') && user.emailVerified) expectedRole = 'admin';
+         else if (user.email && user.email.endsWith('@staff.alpha.com') && user.emailVerified) expectedRole = 'staff';
          else if ((user.email === 'fresneilm139@gmail.com' || user.email === 'zlatobambi@gmail.com') && user.emailVerified) expectedRole = 'admin';
          
          if (role !== expectedRole) {
@@ -87,10 +87,10 @@ async function extractAuthUser(user: User): Promise<AuthUser> {
          }
        } else {
          role = 'client';
-         if (user.email && user.email.endsWith('@admin.alpha.com')) role = 'admin';
-         else if (user.email && user.email.endsWith('@staff.alpha.com')) role = 'staff';
+         if (user.email && user.email.endsWith('@admin.alpha.com') && user.emailVerified) role = 'admin';
+         else if (user.email && user.email.endsWith('@staff.alpha.com') && user.emailVerified) role = 'staff';
          else if ((user.email === 'fresneilm139@gmail.com' || user.email === 'zlatobambi@gmail.com') && user.emailVerified) role = 'admin';
-         
+
          try {
            await setDoc(doc(db, 'users', user.uid), {
               uid:         user.uid,
@@ -108,8 +108,8 @@ async function extractAuthUser(user: User): Promise<AuthUser> {
      } catch (e) {
        console.error("Failed to read user role", e);
        role = 'client';
-       if (user.email && user.email.endsWith('@admin.alpha.com')) role = 'admin';
-       else if (user.email && user.email.endsWith('@staff.alpha.com')) role = 'staff';
+       if (user.email && user.email.endsWith('@admin.alpha.com') && user.emailVerified) role = 'admin';
+       else if (user.email && user.email.endsWith('@staff.alpha.com') && user.emailVerified) role = 'staff';
        else if ((user.email === 'fresneilm139@gmail.com' || user.email === 'zlatobambi@gmail.com') && user.emailVerified) role = 'admin';
      }
   }

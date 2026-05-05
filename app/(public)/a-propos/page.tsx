@@ -154,7 +154,7 @@ export default function APropos() {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
               </div>
-              <h3 className="font-heading text-2xl font-bold">Stefane MIKANGOUNOU</h3>
+              <h3 className="font-heading text-2xl font-bold">Stefane Rynaldi HAKOULA</h3>
               <p className="text-primary font-medium text-sm tracking-widest uppercase mb-4">
                 Directeur Stratégique
               </p>

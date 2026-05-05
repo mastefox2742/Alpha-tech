@@ -144,18 +144,19 @@ service cloud.firestore {
           'role', 'uid', 'email', 'createdAt', 'disabled'
         ])) || isAdmin() || (
         isOwner(userId)
+        && request.auth.token.email_verified == true
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role'])
         && (
            (request.resource.data.role == 'admin' && (request.auth.token.get('email', '') == 'fresneilm139@gmail.com' || request.auth.token.get('email', '') == 'zlatobambi@gmail.com' || request.auth.token.get('email', '').matches('.*@admin\\.alpha\\.com')))
-           || (request.resource.data.role == 'staff' && request.auth.token.get('email', '').matches('.*@staff\\.alpha\\.com'))
+           || (request.resource.data.role == 'staff' && request.auth.token.email_verified == true && request.auth.token.get('email', '').matches('.*@staff\\.alpha\\.com'))
         )
       );
 
       /// Création : autorisée pour son propre profil. On empêche l'escalade de privilèges.
       allow create: if isOwner(userId) && (
-        request.resource.data.role == 'client' || 
-        (request.resource.data.role == 'admin' && (request.auth.token.get('email', '') == 'fresneilm139@gmail.com' || request.auth.token.get('email', '') == 'zlatobambi@gmail.com' || request.auth.token.get('email', '').matches('.*@admin\\.alpha\\.com'))) ||
-        (request.resource.data.role == 'staff' && request.auth.token.get('email', '').matches('.*@staff\\.alpha\\.com'))
+        request.resource.data.role == 'client' ||
+        (request.resource.data.role == 'admin' && request.auth.token.email_verified == true && (request.auth.token.get('email', '') == 'fresneilm139@gmail.com' || request.auth.token.get('email', '') == 'zlatobambi@gmail.com' || request.auth.token.get('email', '').matches('.*@admin\\.alpha\\.com'))) ||
+        (request.resource.data.role == 'staff' && request.auth.token.email_verified == true && request.auth.token.get('email', '').matches('.*@staff\\.alpha\\.com'))
       );
 
       /// Suppression : uniquement admin.
