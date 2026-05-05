@@ -130,6 +130,9 @@ export interface AppState {
   revenues: Revenue[];
   teamMembers: TeamMember[];
   alerts: Alert[];
+  projects: Project[];
+  leads: Lead[];
+  notifications: AppNotification[];
   // Config
   budgetTotal: number;
   ticketTarget: number;
@@ -164,7 +167,71 @@ export type AppAction =
   | { type: 'UPDATE_EVENT_DATE'; payload: string }
   | { type: 'UPDATE_BUDGET_TOTAL'; payload: number }
   | { type: 'UPDATE_TICKET_TARGET'; payload: number }
+  | { type: 'SET_PROJECTS'; payload: Project[] }
+  | { type: 'SET_LEADS'; payload: Lead[] }
+  | { type: 'SET_NOTIFICATIONS'; payload: AppNotification[] }
   | { type: 'SYNC_STATE'; payload: AppState };
+
+// ─── Projects ───────────────────────────────────────────────────────────────
+
+export type ProjectStatus = 'en_attente' | 'en_cours' | 'termine' | 'annule';
+export type ProjectPriority = 'haute' | 'normale' | 'basse';
+
+export interface ProjectTask {
+  id: string;
+  description: string;
+  assignedTo: string;
+  dueDate: string;
+  completed: boolean;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  client: string;
+  status: ProjectStatus;
+  priority: ProjectPriority;
+  startDate: string;
+  endDate: string;
+  teamMembers: string[];
+  tasks: ProjectTask[];
+  notes: string;
+  budget?: number;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Leads / CRM ────────────────────────────────────────────────────────────
+
+export type LeadStatus = 'nouveau' | 'en_cours' | 'traite' | 'archive';
+
+export interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: LeadStatus;
+  notes: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// ─── Notifications ──────────────────────────────────────────────────────────
+
+export type NotifType = 'info' | 'success' | 'warning' | 'error';
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: NotifType;
+  read: boolean;
+  link?: string;
+  createdAt: string;
+}
 
 // ─── AI ─────────────────────────────────────────────────────────────────────
 

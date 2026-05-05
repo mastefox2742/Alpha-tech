@@ -5,6 +5,7 @@ import { daysUntilEvent } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { Menu } from 'lucide-react';
 import { useCurrentUser } from '@/components/layout/AuthGuard';
+import NotificationBell from '@/components/layout/NotificationBell';
 
 interface HeaderProps {
   title: string;
@@ -69,6 +70,8 @@ export default function Header({ title, subtitle, role = 'client', action }: Hea
         </div>
 
         {action}
+
+        <NotificationBell />
 
         {/* User badge */}
         <div className={cn(

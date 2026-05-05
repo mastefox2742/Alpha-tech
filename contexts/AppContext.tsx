@@ -10,6 +10,9 @@ import { expenseService } from '@/lib/services/expense.service';
 import { meetingService } from '@/lib/services/meeting.service';
 import { teamService } from '@/lib/services/team.service';
 import { revenueService } from '@/lib/services/revenue.service';
+import { projectService } from '@/lib/services/project.service';
+import { leadService } from '@/lib/services/lead.service';
+import { notificationService } from '@/lib/services/notification.service';
 
 // ─── Reducer ────────────────────────────────────────────────────────────────
 
@@ -116,7 +119,13 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         ticketTarget: action.payload,
       };
-    case 'SYNC_STATE': // Used to replace full state from other tabs
+    case 'SET_PROJECTS':
+      return { ...state, projects: action.payload };
+    case 'SET_LEADS':
+      return { ...state, leads: action.payload };
+    case 'SET_NOTIFICATIONS':
+      return { ...state, notifications: action.payload };
+    case 'SYNC_STATE':
       return action.payload;
     default:
       return state;
@@ -170,12 +179,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dispatchBase({ type: 'SET_TEAM_MEMBERS', payload: members });
     });
 
+    const subProjects = projectService.getProjects().subscribe(projects => {
+      dispatchBase({ type: 'SET_PROJECTS', payload: projects });
+    });
+
+    const subLeads = leadService.getLeads().subscribe(leads => {
+      dispatchBase({ type: 'SET_LEADS', payload: leads });
+    });
+
+    const subNotifs = notificationService.getNotifications().subscribe(notifs => {
+      dispatchBase({ type: 'SET_NOTIFICATIONS', payload: notifs });
+    });
+
     return () => {
       unsubTickets();
       subExpenses.unsubscribe();
       subMeetings.unsubscribe();
       subRevenues.unsubscribe();
       subTeam.unsubscribe();
+      subProjects.unsubscribe();
+      subLeads.unsubscribe();
+      subNotifs.unsubscribe();
     };
   }, [state.currentUser]);
 

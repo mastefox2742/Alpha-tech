@@ -122,3 +122,33 @@ textarea { resize: vertical; min-height: 120px; }
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* ── Form inputs ── */
+.input-field {
+  width: 100%;
+  background: #0d1117;
+  border: 1px solid #222222;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #ffffff;
+  font-family: var(--font-jakarta);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+.input-field:focus {
+  border-color: #8E54E9;
+  box-shadow: 0 0 0 3px rgba(142, 84, 233, 0.15);
+}
+.input-field::placeholder { color: #555555; }
+.input-field:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.label-field {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #a3a3a3;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}

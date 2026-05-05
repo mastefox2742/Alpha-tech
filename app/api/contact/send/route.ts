@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,6 +52,26 @@ export async function POST(req: NextRequest) {
         </div>
       `,
     });
+
+    // Sauvegarder le lead dans Firestore
+    try {
+      await addDoc(collection(db, 'leads'), {
+        name, email, subject, message,
+        status: 'nouveau',
+        notes: '',
+        createdAt: serverTimestamp(),
+      });
+      await addDoc(collection(db, 'notifications'), {
+        title: '💬 Nouveau message de contact',
+        message: `${name} (${email}) : ${subject}`,
+        type: 'info',
+        read: false,
+        link: '/staff/leads',
+        createdAt: serverTimestamp(),
+      });
+    } catch (e) {
+      console.warn('Firestore lead save failed:', e);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

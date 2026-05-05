@@ -356,5 +356,75 @@ service cloud.firestore {
       allow read: if true; // Publique car affichée sur la page d'inscription !
       allow write: if isStaff();
     }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : projects
+    // Gestion de projets. Staff peut créer/modifier, admin et client lisent.
+    // ═══════════════════════════════════════════════════════════════════════
+    match /projects/{projectId} {
+      allow read: if isEventViewer() || isStaff();
+
+      allow create: if isStaff()
+        && hasRequiredFields(['name', 'description', 'status', 'createdBy', 'createdAt'])
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 200;
+
+      allow update: if isStaff()
+        && doesNotModifySystemFields();
+
+      allow delete: if isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : leads
+    // CRM — messages de contact. Créés par le formulaire public ou staff.
+    // Lecture et modification uniquement par staff/admin.
+    // ═══════════════════════════════════════════════════════════════════════
+    match /leads/{leadId} {
+      // Création publique (formulaire de contact) — champs limités, pas d'auth requise.
+      allow create: if hasRequiredFields(['name', 'email', 'subject', 'message', 'status', 'createdAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 200
+        && request.resource.data.email is string && request.resource.data.email.matches('^[^@]+@[^@]+\\.[^@]+$')
+        && request.resource.data.subject is string && request.resource.data.subject.size() > 0 && request.resource.data.subject.size() <= 300
+        && request.resource.data.message is string && request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 5000
+        && request.resource.data.status == 'nouveau';
+
+      allow read: if isStaff();
+      allow update: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : notifications
+    // Notifications in-app. Créées par le système (API routes / Cloud Functions).
+    // Staff peut lire et marquer comme lues.
+    // ═══════════════════════════════════════════════════════════════════════
+    match /notifications/{notifId} {
+      allow read: if isStaff();
+
+      // Création via API route (server-side avec Admin SDK) — pas de règle client nécessaire.
+      // On autorise aussi la création depuis le client pour les notifications internes staff.
+      allow create: if isStaff()
+        && hasRequiredFields(['title', 'message', 'type', 'read', 'createdAt'])
+        && request.resource.data.read == false;
+
+      // Staff peut uniquement marquer comme lu.
+      allow update: if isStaff()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+
+      allow delete: if isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // COLLECTION : authorized_staff
+    // Liste des emails autorisés à s'inscrire en tant que staff.
+    // ═══════════════════════════════════════════════════════════════════════
+    match /authorized_staff/{docId} {
+      // Staff peut lire sa propre entrée (pour vérifier son autorisation).
+      allow read: if isStaff() || (isAuthenticated() && resource.data.get('email', '') == request.auth.token.get('email', ''));
+      allow write: if isAdmin();
+    }
   }
 }

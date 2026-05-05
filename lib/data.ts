@@ -2,6 +2,7 @@ import {
   Meeting, Expense, TicketSale, Revenue, TeamMember, AppState
 } from './types';
 
+
 // ─── Team Members ──────────────────────────────────────────────────────────
 
 export const initialTeamMembers: TeamMember[] = [
@@ -87,6 +88,9 @@ export const initialState: AppState = {
   revenues: initialRevenues,
   teamMembers: initialTeamMembers,
   alerts: [],
+  projects: [],
+  leads: [],
+  notifications: [],
   budgetTotal: 0,
   ticketTarget: 0,
   eventDate: '2026-06-01',

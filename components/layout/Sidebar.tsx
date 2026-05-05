@@ -17,6 +17,7 @@ interface NavItem {
 
 const clientNav: NavItem[] = [
   { href: '/client',           icon: '📊', label: 'Dashboard' },
+  { href: '/client/projets',   icon: '📁', label: 'Projets' },
   { href: '/client/finances',  icon: '💰', label: 'Finances' },
   { href: '/client/billets',   icon: '🎟', label: 'Billets & Revenus' },
   { href: '/client/reunions',  icon: '📋', label: 'Réunions' },
@@ -27,6 +28,8 @@ const clientNav: NavItem[] = [
 
 const staffNav: NavItem[] = [
   { href: '/staff',              icon: '🏠', label: 'Dashboard' },
+  { href: '/staff/projets',      icon: '📁', label: 'Projets' },
+  { href: '/staff/leads',        icon: '💬', label: 'Leads & CRM' },
   { href: '/staff/inscriptions', icon: '📝', label: 'Inscriptions' },
   { href: '/staff/notes',        icon: '✍️', label: 'Notes de réunion' },
   { href: '/staff/depenses',     icon: '💸', label: 'Dépenses' },
