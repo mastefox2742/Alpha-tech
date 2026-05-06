@@ -1,4 +1,4 @@
-import { collection, doc, query, addDoc, updateDoc, onSnapshot, serverTimestamp, orderBy } from 'firebase/firestore';
+import { collection, doc, query, addDoc, updateDoc, onSnapshot, serverTimestamp, orderBy, limit } from 'firebase/firestore';
 import { Observable } from 'rxjs';
 import { db } from '../firebase';
 import { Lead } from '../types';
@@ -22,7 +22,7 @@ function toLead(id: string, data: Record<string, any>): Lead {
 export const leadService = {
   getLeads(): Observable<Lead[]> {
     return new Observable<Lead[]>(subscriber => {
-      const q = query(collection(db, COL), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, COL), orderBy('createdAt', 'desc'), limit(200));
       const unsub = onSnapshot(q, snap => {
         subscriber.next(snap.docs.map(d => toLead(d.id, d.data())));
       }, err => subscriber.error(err));

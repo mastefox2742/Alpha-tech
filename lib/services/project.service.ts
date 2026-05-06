@@ -1,4 +1,4 @@
-import { collection, doc, query, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, orderBy } from 'firebase/firestore';
+import { collection, doc, query, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, orderBy, limit } from 'firebase/firestore';
 import { Observable } from 'rxjs';
 import { db } from '../firebase';
 import { Project } from '../types';
@@ -29,7 +29,7 @@ function toProject(id: string, data: Record<string, any>): Project {
 export const projectService = {
   getProjects(): Observable<Project[]> {
     return new Observable<Project[]>(subscriber => {
-      const q = query(collection(db, COL), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, COL), orderBy('createdAt', 'desc'), limit(200));
       const unsub = onSnapshot(q, snap => {
         subscriber.next(snap.docs.map(d => toProject(d.id, d.data())));
       }, err => subscriber.error(err));
