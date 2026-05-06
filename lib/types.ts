@@ -98,6 +98,7 @@ export interface TeamMember {
   slidesReady: boolean;
   email?: string;
   phone?: string;
+  photoURL?: string;
 }
 
 // ─── Alerts & Errors ────────────────────────────────────────────────────────

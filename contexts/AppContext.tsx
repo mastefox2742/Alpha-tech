@@ -13,6 +13,8 @@ import { revenueService } from '@/lib/services/revenue.service';
 import { projectService } from '@/lib/services/project.service';
 import { leadService } from '@/lib/services/lead.service';
 import { notificationService } from '@/lib/services/notification.service';
+import { authService } from '@/lib/services/auth.service';
+import { UserRole } from '@/lib/types';
 
 // ─── Reducer ────────────────────────────────────────────────────────────────
 
@@ -148,7 +150,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatchBase] = useReducer(appReducer, initialState);
   const isInitialized = useRef(false);
 
-  // Sync state with Firebase 
+  // Synchronise currentUser depuis Firebase Auth → state.currentUser
+  useEffect(() => {
+    const sub = authService.user$.subscribe(authUser => {
+      dispatchBase({
+        type: 'SET_USER',
+        payload: authUser ? {
+          id:    authUser.uid,
+          name:  authUser.displayName ?? authUser.email ?? 'Utilisateur',
+          role:  (authUser.role ?? 'client') as UserRole,
+          email: authUser.email ?? '',
+        } : null,
+      });
+    });
+    return () => sub.unsubscribe();
+  }, []);
+
+  // Sync state with Firebase
   useEffect(() => {
     if (!state.currentUser) return;
 
@@ -208,23 +226,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        dispatchBase({ type: 'SYNC_STATE', payload: JSON.parse(stored) });
+        const parsed = JSON.parse(stored);
+        // teamMembers toujours chargés depuis Firestore — jamais depuis le cache local
+        parsed.teamMembers = [];
+        dispatchBase({ type: 'SYNC_STATE', payload: parsed });
       }
     } catch(e) {}
     isInitialized.current = true;
   }, []);
 
-  // Enhanced dispatch that syncs to LocalStorage
-  const dispatch = React.useCallback((action: AppAction) => {
-    dispatchBase(action);
-    
-    // Defer the local storage write so it happens after the reducer state is applied
-    setTimeout(() => {
-      // In a real app we'd want to just calculate the next state, 
-      // but setTimeout works to read it from where it's stored.
-      // Actually state is old here. So we dispatch first, and use effect to save state
-    }, 0);
-  }, []);
 
   // Save state whenever it changes
   useEffect(() => {
