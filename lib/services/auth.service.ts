@@ -60,60 +60,42 @@ export interface LoginResult {
  * Extrait le rôle depuis les Custom Claims du JWT.
  * Ne fait JAMAIS confiance au localStorage ou à un paramètre côté client.
  */
-async function extractAuthUser(user: User): Promise<AuthUser> {
-  // forceRefresh: true → force le renouvellement du token.
-  // Utile après qu'un admin a changé le rôle d'un utilisateur.
-  const tokenResult: IdTokenResult = await getIdTokenResult(user, /* forceRefresh */ false);
+function roleFromEmail(email: string | null, emailVerified: boolean): UserRole | null {
+  if (!email || !emailVerified) return null;
+  if (email === 'fresneilm139@gmail.com' || email === 'zlatobambi@gmail.com') return 'admin';
+  if (email.endsWith('@admin.alpha.com')) return 'admin';
+  if (email.endsWith('@staff.alpha.com')) return 'staff';
+  return null;
+}
 
+async function extractAuthUser(user: User): Promise<AuthUser> {
+  const tokenResult: IdTokenResult = await getIdTokenResult(user, false);
   const claims = tokenResult.claims as Record<string, unknown>;
-  let role = (claims['role'] as UserRole) ?? null;
+  let role: UserRole | null = (claims['role'] as UserRole) ?? null;
 
   if (!role) {
-     try {
-       const userDoc = await getDoc(doc(db, 'users', user.uid));
-       if (userDoc.exists()) {
-         role = userDoc.data()?.role ?? 'client';
-         
-         let expectedRole = role;
-         if (user.email && user.email.endsWith('@admin.alpha.com') && user.emailVerified) expectedRole = 'admin';
-         else if (user.email && user.email.endsWith('@staff.alpha.com') && user.emailVerified) expectedRole = 'staff';
-         else if ((user.email === 'fresneilm139@gmail.com' || user.email === 'zlatobambi@gmail.com') && user.emailVerified) expectedRole = 'admin';
-         
-         if (role !== expectedRole) {
-           try {
-             await setDoc(doc(db, 'users', user.uid), { role: expectedRole }, { merge: true });
-             role = expectedRole;
-           } catch (e) {
-             console.error("Unable to force role upgrade", e);
-           }
-         }
-       } else {
-         role = 'client';
-         if (user.email && user.email.endsWith('@admin.alpha.com') && user.emailVerified) role = 'admin';
-         else if (user.email && user.email.endsWith('@staff.alpha.com') && user.emailVerified) role = 'staff';
-         else if ((user.email === 'fresneilm139@gmail.com' || user.email === 'zlatobambi@gmail.com') && user.emailVerified) role = 'admin';
+    // 1. Priorité à l'email — fiable, pas de dépendance Firestore
+    role = roleFromEmail(user.email, user.emailVerified);
 
-         try {
-           await setDoc(doc(db, 'users', user.uid), {
-              uid:         user.uid,
-              email:       user.email ?? null,
-              displayName: user.displayName ?? null,
-              role:        role,
-              disabled:    false,
-              createdAt:   new Date().toISOString()
-           });
-           console.log("User document bootstraped");
-         } catch(e) {
-           console.error("Failed to bootstrap user", e);
-         }
-       }
-     } catch (e) {
-       console.error("Failed to read user role", e);
-       role = 'client';
-       if (user.email && user.email.endsWith('@admin.alpha.com') && user.emailVerified) role = 'admin';
-       else if (user.email && user.email.endsWith('@staff.alpha.com') && user.emailVerified) role = 'staff';
-       else if ((user.email === 'fresneilm139@gmail.com' || user.email === 'zlatobambi@gmail.com') && user.emailVerified) role = 'admin';
-     }
+    // 2. Sinon lire le document Firestore
+    if (!role) {
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        role = (userDoc.exists() ? userDoc.data()?.role : null) ?? 'client';
+      } catch {
+        role = 'client';
+      }
+    }
+
+    // 3. Synchroniser le document en arrière-plan (non-bloquant)
+    setDoc(doc(db, 'users', user.uid), {
+      uid:         user.uid,
+      email:       user.email ?? null,
+      displayName: user.displayName ?? null,
+      role,
+      disabled:    false,
+      createdAt:   new Date().toISOString(),
+    }, { merge: true }).catch(() => {});
   }
 
   return {
