@@ -27,8 +27,9 @@ function previewEmail(firstName: string, lastName: string, role: string): string
   if (!firstName && !lastName) return '';
   const base = `${firstName.charAt(0)}.${lastName}`
     .toLowerCase().replace(/\s+/g, '').normalize('NFD').replace(/[̀-ͯ]/g, '');
-  if (role === 'admin') return `${base}@admin.alpha.com`;
-  if (role === 'staff') return `${base}@staff.alpha.com`;
+  if (role === 'admin')  return `${base}@admin.alpha.com`;
+  if (role === 'staff')  return `${base}@staff.alpha.com`;
+  if (role === 'client') return `${base}@team.alpha.com`;
   return '';
 }
 
@@ -79,7 +80,6 @@ interface CreateForm {
   firstName: string;
   lastName: string;
   role: UserRole;
-  clientEmail: string;
   password: string;
 }
 
@@ -95,7 +95,7 @@ export default function EquipeView({ role }: { role: 'client' | 'staff' }) {
   const [creating, setCreating]         = useState(false);
   const [createdCreds, setCreatedCreds] = useState<{ email: string; password: string } | null>(null);
   const [form, setForm]                 = useState<CreateForm>({
-    firstName: '', lastName: '', role: 'staff', clientEmail: '', password: generatePassword(),
+    firstName: '', lastName: '', role: 'staff', password: generatePassword(),
   });
   const [copied, setCopied] = useState<'email' | 'pwd' | null>(null);
 
@@ -107,8 +107,7 @@ export default function EquipeView({ role }: { role: 'client' | 'staff' }) {
   const [savingProfile, setSavingProfile]     = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
-  const emailPreview =
-    form.role === 'client' ? form.clientEmail : previewEmail(form.firstName, form.lastName, form.role);
+  const emailPreview = previewEmail(form.firstName, form.lastName, form.role);
 
   function copyText(text: string, field: 'email' | 'pwd') {
     navigator.clipboard.writeText(text).then(() => {
@@ -121,7 +120,7 @@ export default function EquipeView({ role }: { role: 'client' | 'staff' }) {
     setShowModal(false);
     setCreatedCreds(null);
     setCreating(false);
-    setForm({ firstName: '', lastName: '', role: 'staff', clientEmail: '', password: generatePassword() });
+    setForm({ firstName: '', lastName: '', role: 'staff', password: generatePassword() });
   }
 
   function openEdit(member: TeamMember) {
@@ -168,10 +167,6 @@ export default function EquipeView({ role }: { role: 'client' | 'staff' }) {
       toast.error('Prénom et nom requis');
       return;
     }
-    if (form.role === 'client' && !form.clientEmail.trim()) {
-      toast.error('Email requis pour un compte client');
-      return;
-    }
     setCreating(true);
     try {
       const { email } = await authService.createEmployee(
@@ -179,7 +174,6 @@ export default function EquipeView({ role }: { role: 'client' | 'staff' }) {
         form.lastName.trim(),
         form.role,
         form.password,
-        form.role === 'client' ? form.clientEmail.trim() : undefined,
       );
       setCreatedCreds({ email, password: form.password });
       toast.success('Compte créé avec succès');
@@ -509,26 +503,12 @@ export default function EquipeView({ role }: { role: 'client' | 'staff' }) {
                   </select>
                 </div>
 
-                {form.role === 'client' ? (
-                  <div>
-                    <label className="label-field">Email réel du client</label>
-                    <input
-                      type="email"
-                      className="input-field"
-                      placeholder="client@gmail.com"
-                      value={form.clientEmail}
-                      onChange={e => setForm(f => ({ ...f, clientEmail: e.target.value }))}
-                      required
-                    />
-                  </div>
-                ) : (
-                  <div className="bg-highlight/5 border border-highlight/20 rounded-xl p-3">
-                    <p className="text-xs text-muted mb-1">Email généré automatiquement</p>
-                    <p className="text-sm font-mono text-ink">
-                      {emailPreview || <span className="text-muted italic">Entrez prénom + nom</span>}
-                    </p>
-                  </div>
-                )}
+                <div className="bg-highlight/5 border border-highlight/20 rounded-xl p-3">
+                  <p className="text-xs text-muted mb-1">Email généré automatiquement</p>
+                  <p className="text-sm font-mono text-ink">
+                    {emailPreview || <span className="text-muted italic">Entrez prénom + nom</span>}
+                  </p>
+                </div>
 
                 <div>
                   <label className="label-field">Mot de passe temporaire</label>

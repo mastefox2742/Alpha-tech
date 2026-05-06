@@ -71,6 +71,7 @@ function roleFromEmail(email: string | null, emailVerified: boolean): UserRole |
   // Domaines internes fictifs : impossible de vérifier l'email → on fait confiance au domaine
   if (email.endsWith('@admin.alpha.com')) return 'admin';
   if (email.endsWith('@staff.alpha.com')) return 'staff';
+  if (email.endsWith('@team.alpha.com'))  return 'client';
   return null;
 }
 
@@ -275,7 +276,6 @@ class AuthService {
     lastName: string,
     role: UserRole,
     password: string,
-    clientEmail?: string,
   ): Promise<{ email: string }> {
     const base = `${firstName.charAt(0)}.${lastName}`
       .toLowerCase()
@@ -284,9 +284,9 @@ class AuthService {
       .replace(/[̀-ͯ]/g, '');
 
     const email =
-      role === 'admin' ? `${base}@admin.alpha.com`
-      : role === 'staff' ? `${base}@staff.alpha.com`
-      : clientEmail!;
+      role === 'admin'  ? `${base}@admin.alpha.com`
+      : role === 'staff'  ? `${base}@staff.alpha.com`
+      : `${base}@team.alpha.com`;
 
     const displayName = `${firstName} ${lastName}`.trim();
     const tempApp = initializeApp(auth.app.options, `emp-${Date.now()}`);
