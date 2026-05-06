@@ -20,6 +20,7 @@ import {
   signOut,
   onAuthStateChanged,
   getIdTokenResult,
+  getAuth,
   User,
   IdTokenResult,
   sendPasswordResetEmail,
@@ -27,8 +28,9 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
 } from 'firebase/auth';
+import { initializeApp, deleteApp } from 'firebase/app';
 import { Observable, from, of, BehaviorSubject } from 'rxjs';
-import { switchMap, map, catchError, shareReplay } from 'rxjs/operators';
+import { switchMap, catchError, shareReplay } from 'rxjs/operators';
 import { getDoc, doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 
@@ -249,6 +251,53 @@ class AuthService {
       reauthenticateWithCredential(user, credential)
         .then(() => updatePassword(user, newPassword))
     );
+  }
+
+  // ── Création d'un compte employé (sans déconnecter l'admin) ────────────────────
+
+  /**
+   * Crée un compte Firebase Auth dans une instance temporaire isolée,
+   * de sorte que la session de l'admin courant n'est pas affectée.
+   */
+  async createEmployee(
+    firstName: string,
+    lastName: string,
+    role: UserRole,
+    password: string,
+    clientEmail?: string,
+  ): Promise<{ email: string }> {
+    const base = `${firstName.charAt(0)}.${lastName}`
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '');
+
+    const email =
+      role === 'admin' ? `${base}@admin.alpha.com`
+      : role === 'staff' ? `${base}@staff.alpha.com`
+      : clientEmail!;
+
+    const displayName = `${firstName} ${lastName}`.trim();
+    const tempApp = initializeApp(auth.app.options, `emp-${Date.now()}`);
+    const tempAuth = getAuth(tempApp);
+
+    try {
+      const { user } = await createUserWithEmailAndPassword(tempAuth, email, password);
+      await updateProfile(user, { displayName });
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email,
+        displayName,
+        role,
+        disabled: false,
+        createdAt: new Date().toISOString(),
+      });
+    } finally {
+      await signOut(tempAuth).catch(() => {});
+      await deleteApp(tempApp).catch(() => {});
+    }
+
+    return { email };
   }
 
   // ── Refresh forcé du token (après changement de rôle par un admin) ───────────
