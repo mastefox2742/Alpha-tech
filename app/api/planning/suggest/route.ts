@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const { meetingTitle, pendingActions, previousMeetings } = await req.json();
 
     const client = getClient();
-    const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const prompt = `Tu es l'assistante IA d'Alpha tech, une plateforme de gestion d'événements.
 

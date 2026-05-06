@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const { meetingTitle, agenda, participants, rawNotes } = await req.json();
 
     const client = getClient();
-    const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const prompt = `Tu es l'assistante IA d'Alpha tech. Analyse les notes brutes de cette réunion et génère un compte rendu structuré.
 
