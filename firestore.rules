@@ -152,12 +152,12 @@ service cloud.firestore {
         )
       );
 
-      /// Création : autorisée pour son propre profil. On empêche l'escalade de privilèges.
-      allow create: if isOwner(userId) && (
+      /// Création : autorisée pour son propre profil, ou par un admin pour créer un compte employé.
+      allow create: if isAdmin() || (isOwner(userId) && (
         request.resource.data.role == 'client' ||
         (request.resource.data.role == 'admin' && request.auth.token.email_verified == true && (request.auth.token.get('email', '') == 'fresneilm139@gmail.com' || request.auth.token.get('email', '') == 'zlatobambi@gmail.com' || request.auth.token.get('email', '').matches('.*@admin\\.alpha\\.com'))) ||
         (request.resource.data.role == 'staff' && request.auth.token.email_verified == true && request.auth.token.get('email', '').matches('.*@staff\\.alpha\\.com'))
-      );
+      ));
 
       /// Suppression : uniquement admin.
       allow delete: if isAdmin();
