@@ -181,33 +181,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       (err) => console.error('Tickets stream error:', err)
     );
 
-    const subExpenses = expenseService.getExpenses().subscribe(expenses => {
-      dispatchBase({ type: 'SET_EXPENSES', payload: expenses });
-    });
+    const noop = (err: unknown) => console.error('Firestore stream error:', err);
 
-    const subMeetings = meetingService.getMeetings().subscribe(meetings => {
-      dispatchBase({ type: 'SET_MEETINGS', payload: meetings });
-    });
-    
-    const subRevenues = revenueService.getRevenues().subscribe(revenues => {
-      dispatchBase({ type: 'SET_REVENUES', payload: revenues });
-    });
-    
-    const subTeam = teamService.getTeamMembers().subscribe(members => {
-      dispatchBase({ type: 'SET_TEAM_MEMBERS', payload: members });
-    });
-
-    const subProjects = projectService.getProjects().subscribe(projects => {
-      dispatchBase({ type: 'SET_PROJECTS', payload: projects });
-    });
-
-    const subLeads = leadService.getLeads().subscribe(leads => {
-      dispatchBase({ type: 'SET_LEADS', payload: leads });
-    });
-
-    const subNotifs = notificationService.getNotifications().subscribe(notifs => {
-      dispatchBase({ type: 'SET_NOTIFICATIONS', payload: notifs });
-    });
+    const subExpenses = expenseService.getExpenses().subscribe({ next: expenses => dispatchBase({ type: 'SET_EXPENSES', payload: expenses }), error: noop });
+    const subMeetings = meetingService.getMeetings().subscribe({ next: meetings => dispatchBase({ type: 'SET_MEETINGS', payload: meetings }), error: noop });
+    const subRevenues = revenueService.getRevenues().subscribe({ next: revenues => dispatchBase({ type: 'SET_REVENUES', payload: revenues }), error: noop });
+    const subTeam     = teamService.getTeamMembers().subscribe({ next: members  => dispatchBase({ type: 'SET_TEAM_MEMBERS', payload: members }), error: noop });
+    const subProjects = projectService.getProjects().subscribe({ next: projects => dispatchBase({ type: 'SET_PROJECTS', payload: projects }), error: noop });
+    const subLeads    = leadService.getLeads().subscribe({ next: leads => dispatchBase({ type: 'SET_LEADS', payload: leads }), error: noop });
+    const subNotifs   = notificationService.getNotifications().subscribe({ next: notifs => dispatchBase({ type: 'SET_NOTIFICATIONS', payload: notifs }), error: noop });
 
     return () => {
       unsubTickets();
@@ -227,8 +209,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // teamMembers toujours chargés depuis Firestore — jamais depuis le cache local
-        parsed.teamMembers = [];
+        // Ces données viennent toujours de Firebase — jamais du cache local
+        parsed.teamMembers  = [];
+        parsed.currentUser  = null; // géré exclusivement par authService.user$
         dispatchBase({ type: 'SYNC_STATE', payload: parsed });
       }
     } catch(e) {}
