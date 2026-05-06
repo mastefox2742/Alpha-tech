@@ -100,8 +100,9 @@ Réponds toujours en français, de manière claire et utile. Tu peux utiliser du
         }),
       });
 
-      if (!res.ok) throw new Error('API error');
-      const { content: reply } = await res.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Erreur HTTP ${res.status}`);
+      const { content: reply } = data;
 
       const assistantMsg: ChatMessage = {
         id: generateId(),
@@ -110,11 +111,12 @@ Réponds toujours en français, de manière claire et utile. Tu peux utiliser du
         createdAt: new Date().toISOString(),
       };
       setMessages(prev => [...prev, assistantMsg]);
-    } catch {
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Erreur inconnue';
       setMessages(prev => [...prev, {
         id: generateId(),
         role: 'assistant',
-        content: '❌ Erreur de connexion à l\'API. Vérifiez que `ANTHROPIC_API_KEY` est bien défini dans `.env.local`.',
+        content: `❌ ${errorMsg}`,
         createdAt: new Date().toISOString(),
       }]);
     } finally {
