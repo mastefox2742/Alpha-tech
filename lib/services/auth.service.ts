@@ -16,6 +16,8 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
@@ -171,17 +173,40 @@ class AuthService {
   }
 
   loginWithGoogle(): Observable<LoginResult> {
+    const provider = new GoogleAuthProvider();
+    const isMobile = typeof window !== 'undefined' &&
+      /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // Sur mobile les popups sont bloqués — on utilise le redirect
+      return from(
+        signInWithRedirect(auth, provider).then(() => ({ success: true } as LoginResult))
+      ).pipe(
+        catchError(error => of({ success: false, error: this.mapFirebaseError(error.code) } as LoginResult))
+      );
+    }
+
     return from(
-      signInWithPopup(auth, new GoogleAuthProvider())
+      signInWithPopup(auth, provider)
         .then(async credential => {
           const user = await extractAuthUser(credential.user);
           return { success: true, user } as LoginResult;
         })
     ).pipe(
-      catchError(error => {
-        const message = this.mapFirebaseError(error.code);
-        return of({ success: false, error: message } as LoginResult);
+      catchError(error => of({ success: false, error: this.mapFirebaseError(error.code) } as LoginResult))
+    );
+  }
+
+  // Appelé au chargement de la page login pour récupérer le résultat du redirect Google
+  handleGoogleRedirect(): Observable<LoginResult | null> {
+    return from(
+      getRedirectResult(auth).then(async credential => {
+        if (!credential) return null;
+        const user = await extractAuthUser(credential.user);
+        return { success: true, user } as LoginResult;
       })
+    ).pipe(
+      catchError(() => of(null))
     );
   }
 
@@ -302,17 +327,23 @@ class AuthService {
 
   private mapFirebaseError(code: string): string {
     const errors: Record<string, string> = {
-      'auth/user-not-found':       'Aucun compte trouvé avec cet email.',
-      'auth/wrong-password':       'Mot de passe incorrect.',
-      'auth/invalid-email':        'Format d\'email invalide.',
-      'auth/invalid-credential':   'Identifiants incorrects.',
-      'auth/email-already-in-use': 'Cet email est déjà utilisé.',
-      'auth/weak-password':        'Le mot de passe doit contenir au moins 6 caractères.',
-      'auth/user-disabled':        'Ce compte a été désactivé.',
-      'auth/too-many-requests':    'Trop de tentatives. Réessayez dans quelques minutes.',
-      'auth/network-request-failed': 'Erreur réseau. Vérifiez votre connexion.',
+      'auth/user-not-found':          'Aucun compte trouvé avec cet email.',
+      'auth/wrong-password':          'Mot de passe incorrect.',
+      'auth/invalid-email':           'Format d\'email invalide.',
+      'auth/invalid-credential':      'Identifiants incorrects.',
+      'auth/email-already-in-use':    'Cet email est déjà utilisé.',
+      'auth/weak-password':           'Le mot de passe doit contenir au moins 6 caractères.',
+      'auth/user-disabled':           'Ce compte a été désactivé.',
+      'auth/too-many-requests':       'Trop de tentatives. Réessayez dans quelques minutes.',
+      'auth/network-request-failed':  'Erreur réseau. Vérifiez votre connexion.',
+      'auth/popup-blocked':           'Popup bloqué par le navigateur. Autorisez les popups ou réessayez.',
+      'auth/popup-closed-by-user':    'Connexion Google annulée.',
+      'auth/cancelled-popup-request': 'Connexion Google annulée.',
+      'auth/unauthorized-domain':     'Ce domaine n\'est pas autorisé dans Firebase. Contactez l\'administrateur.',
+      'auth/operation-not-allowed':   'La connexion Google n\'est pas activée. Contactez l\'administrateur.',
+      'auth/account-exists-with-different-credential': 'Un compte existe déjà avec cet email via une autre méthode de connexion.',
     };
-    return errors[code] ?? 'Erreur d\'authentification. Réessayez.';
+    return errors[code] ?? `Erreur d'authentification (${code}). Réessayez.`;
   }
 }
 

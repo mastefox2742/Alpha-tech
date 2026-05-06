@@ -18,6 +18,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
 
+  // Récupère le résultat du redirect Google (mobile)
+  useEffect(() => {
+    authService.handleGoogleRedirect().subscribe(result => {
+      if (result?.error) { setError(result.error); setLoading(false); }
+      // Si succès, user$ émettra automatiquement et le useEffect ci-dessous redirigera
+    });
+  }, []);
+
   useEffect(() => {
     if (user) {
       router.replace(user.role === 'staff' || user.role === 'admin' ? '/staff' : '/client');

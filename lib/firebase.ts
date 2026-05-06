@@ -1,20 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import {
-  getAuth,
-  connectAuthEmulator,
-  Auth,
-  setPersistence,
-  browserSessionPersistence,
-} from 'firebase/auth';
-import {
-  getFirestore,
-  connectFirestoreEmulator,
-  Firestore,
-} from 'firebase/firestore';
-import {
-  initializeAppCheck,
-  ReCaptchaV3Provider,
-} from 'firebase/app-check';
+import { getAuth, connectAuthEmulator, Auth } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator, Firestore } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator, Functions } from 'firebase/functions';
 
 const firebaseConfig = {
@@ -29,38 +15,20 @@ const firebaseConfig = {
 const firestoreDatabaseId =
   process.env.NEXT_PUBLIC_FIREBASE_FIRESTORE_DATABASE_ID || '(default)';
 
-// Singleton — évite la double initialisation en HMR (Next.js dev)
 const app: FirebaseApp =
   getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 export const auth: Auth = getAuth(app);
-
-if (typeof window !== 'undefined') {
-  setPersistence(auth, browserSessionPersistence).catch(console.error);
-}
+// Persistance locale par défaut (localStorage) — l'utilisateur reste connecté entre les sessions
 
 export const db: Firestore = getFirestore(app, firestoreDatabaseId);
 
 export const functions: Functions = getFunctions(app, 'europe-west1');
 
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
-  try {
-    initializeAppCheck(app, {
-      provider: new ReCaptchaV3Provider(
-        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || 'dummy_key'
-      ),
-      isTokenAutoRefreshEnabled: true,
-    });
-  } catch (e) {
-    console.warn('App Check initialization failed:', e);
-  }
-}
-
 if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_EMULATORS === 'true') {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
   connectFunctionsEmulator(functions, '127.0.0.1', 5001);
-  console.info('[Firebase] Mode émulateur actif');
 }
 
 export default app;
