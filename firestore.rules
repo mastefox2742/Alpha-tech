@@ -36,11 +36,6 @@ service cloud.firestore {
       ));
     }
 
-    /// Vérifie que l'utilisateur a au moins le rôle requis.
-    function hasRole(role) {
-      return isAuthenticated() && getUserRole() == role;
-    }
-
     /// Admin : droits totaux sur toutes les opérations.
     function isAdmin() {
       return isAuthenticated() && getUserRole() == 'admin';
@@ -104,11 +99,6 @@ service cloud.firestore {
     /// Valide un montant financier (positif, raisonnable).
     function isValidAmount(amount) {
       return amount is number && amount >= 0 && amount <= 10000000; // max 10M FCFA
-    }
-
-    /// Valide une quantité de billets.
-    function isValidQuantity(qty) {
-      return qty is int && qty >= 1 && qty <= 500;
     }
 
     // ── Rate limiting (protection brute force) ──────────────────────────────
