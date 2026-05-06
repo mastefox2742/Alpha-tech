@@ -63,8 +63,12 @@ export interface LoginResult {
  * Ne fait JAMAIS confiance au localStorage ou à un paramètre côté client.
  */
 function roleFromEmail(email: string | null, emailVerified: boolean): UserRole | null {
-  if (!email || !emailVerified) return null;
-  if (email === 'fresneilm139@gmail.com' || email === 'zlatobambi@gmail.com') return 'admin';
+  if (!email) return null;
+  // Comptes Gmail réels : exiger la vérification email (sécurité)
+  if (email === 'fresneilm139@gmail.com' || email === 'zlatobambi@gmail.com') {
+    return emailVerified ? 'admin' : null;
+  }
+  // Domaines internes fictifs : impossible de vérifier l'email → on fait confiance au domaine
   if (email.endsWith('@admin.alpha.com')) return 'admin';
   if (email.endsWith('@staff.alpha.com')) return 'staff';
   return null;

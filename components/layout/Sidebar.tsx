@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 import { authService } from '@/lib/services/auth.service';
+import { useCurrentUser } from '@/components/layout/AuthGuard';
 
 interface NavItem {
   href: string;
@@ -48,6 +49,7 @@ export default function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { dispatch } = useApp();
+  const { user: currentUser } = useCurrentUser();
   const nav = role === 'client' ? clientNav : staffNav;
   const accentClass = role === 'client' ? 'text-accent' : 'text-highlight';
   const isActive = (href: string) =>
@@ -101,7 +103,7 @@ export default function Sidebar({ role }: SidebarProps) {
           <div>
             <div className="font-bold text-sm text-ink leading-none">Alpha tech</div>
             <div className={cn('text-xs font-mono uppercase tracking-wider mt-0.5', accentClass)}>
-              {role === 'client' ? 'Équipe' : 'Secrétaire'}
+              {role === 'client' ? 'Équipe' : currentUser?.role === 'admin' ? 'Administrateur' : 'Secrétaire'}
             </div>
           </div>
         </div>
