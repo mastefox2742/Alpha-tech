@@ -1,24 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GeneratedSummary } from '@/lib/types';
 
-let client: Anthropic | null = null;
+let genAI: GoogleGenerativeAI | null = null;
 
 function getClient() {
-  if (!client) {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY non configurée');
+  if (!genAI) {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY non configurée');
     }
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
-  return client;
+  return genAI;
 }
 
 export async function POST(req: NextRequest) {
   try {
     const { meetingTitle, agenda, participants, rawNotes } = await req.json();
 
-    const aiClient = getClient();
+    const client = getClient();
+    const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = `Tu es l'assistante IA d'Alpha tech. Analyse les notes brutes de cette réunion et génère un compte rendu structuré.
 
@@ -48,15 +49,9 @@ Règles :
 - Pour les dates : si aucune date mentionnée, mets une date raisonnable dans 2 semaines
 - Réponds UNIQUEMENT avec le JSON valide, rien d'autre`;
 
-    const response = await aiClient.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1500,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
-
-    // Strip any markdown code blocks if present
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const parsed: GeneratedSummary = JSON.parse(cleaned);
 
