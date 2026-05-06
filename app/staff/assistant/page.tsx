@@ -141,7 +141,7 @@ Réponds toujours en français, de manière claire et utile. Tu peux utiliser du
 
   return (
     <div className="animate-fade-in flex flex-col h-screen">
-      <Header role="staff" title="Assistant IA" subtitle="Propulsé par Claude · Anthropic" />
+      <Header role="staff" title="Assistant IA" subtitle="Propulsé par Gemini · Google" />
 
       {/* Suggestions */}
       {messages.length <= 1 && (
@@ -217,7 +217,7 @@ Réponds toujours en français, de manière claire et utile. Tu peux utiliser du
           </Button>
         </div>
         <p className="text-xs text-muted mt-2 text-center">
-          L&apos;IA connaît toutes vos données en temps réel · Propulsé par Claude (Anthropic)
+          L&apos;IA connaît toutes vos données en temps réel · Propulsé par Gemini (Google)
         </p>
       </div>
     </div>

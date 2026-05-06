@@ -1,40 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-let client: Anthropic | null = null;
+let genAI: GoogleGenerativeAI | null = null;
 
 function getClient() {
-  if (!client) {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY non configurée dans .env.local');
+  if (!genAI) {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY non configurée dans les variables d\'environnement');
     }
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
-  return client;
+  return genAI;
 }
 
 export async function POST(req: NextRequest) {
   try {
     const { systemContext, messages } = await req.json();
 
-    const aiClient = getClient();
-
-    const response = await aiClient.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      system: systemContext,
-      messages: messages.map((m: { role: string; content: string }) => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content,
-      })),
+    const client = getClient();
+    const model = client.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      systemInstruction: systemContext,
     });
 
-    const content = response.content[0];
-    if (content.type !== 'text') {
-      return NextResponse.json({ error: 'Unexpected response type' }, { status: 500 });
-    }
+    // All messages except the last one go into history
+    const history = messages.slice(0, -1).map((m: { role: string; content: string }) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
 
-    return NextResponse.json({ content: content.text });
+    const lastMessage = messages[messages.length - 1];
+
+    const chat = model.startChat({ history });
+    const result = await chat.sendMessage(lastMessage.content);
+    const text = result.response.text();
+
+    return NextResponse.json({ content: text });
   } catch (error: unknown) {
     console.error('AI Chat error:', error);
     const message = error instanceof Error ? error.message : 'Erreur inconnue';
