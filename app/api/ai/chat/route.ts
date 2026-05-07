@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
-let genAI: GoogleGenerativeAI | null = null;
+let ai: GoogleGenAI | null = null;
 
 function getClient() {
-  if (!genAI) {
+  if (!ai) {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error('GEMINI_API_KEY non configurée dans les variables d\'environnement');
     }
-    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
-  return genAI;
+  return ai;
 }
 
 export async function POST(req: NextRequest) {
@@ -18,23 +18,17 @@ export async function POST(req: NextRequest) {
     const { systemContext, messages } = await req.json();
 
     const client = getClient();
-    const model = client.getGenerativeModel({
+
+    const response = await client.models.generateContent({
       model: 'gemini-2.0-flash',
-      systemInstruction: systemContext,
+      config: { systemInstruction: systemContext },
+      contents: messages.map((m: { role: string; content: string }) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      })),
     });
 
-    // All messages except the last one go into history
-    const history = messages.slice(0, -1).map((m: { role: string; content: string }) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }));
-
-    const lastMessage = messages[messages.length - 1];
-
-    const chat = model.startChat({ history });
-    const result = await chat.sendMessage(lastMessage.content);
-    const text = result.response.text();
-
+    const text = response.text ?? '';
     return NextResponse.json({ content: text });
   } catch (error: unknown) {
     console.error('AI Chat error:', error);

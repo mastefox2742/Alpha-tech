@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
-let genAI: GoogleGenerativeAI | null = null;
+let ai: GoogleGenAI | null = null;
 
 function getClient() {
-  if (!genAI) {
+  if (!ai) {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error('GEMINI_API_KEY non configurée');
     }
-    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
-  return genAI;
+  return ai;
 }
 
 export async function POST(req: NextRequest) {
@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
     const { meetingTitle, pendingActions, previousMeetings } = await req.json();
 
     const client = getClient();
-    const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const prompt = `Tu es l'assistante IA d'Alpha tech, une plateforme de gestion d'événements.
 
@@ -46,9 +45,12 @@ Règles :
 - Les points doivent être concrets et actionnables
 - Réponds UNIQUEMENT avec le JSON valide`;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const response = await client.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+    });
 
+    const text = response.text ?? '';
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const parsed = JSON.parse(cleaned);
 
