@@ -166,13 +166,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Sync state with Firebase
+  const currentUserId = state.currentUser?.id ?? null;
   useEffect(() => {
-    if (!state.currentUser) return;
+    if (!currentUserId) return;
 
     const eventId = 'alpha-tech-2026';
-    
+
     // Subscribe to tickets
-    const unsubTickets = ticketService.watchSales(eventId, 
+    const unsubTickets = ticketService.watchSales(eventId,
       (sales) => {
          const typedSales: any[] = sales;
          dispatchBase({ type: 'SET_TICKET_SALES', payload: typedSales });
@@ -180,14 +181,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       (err) => console.error('Tickets stream error:', err)
     );
 
-    const noop = (err: unknown) => console.error('Firestore stream error:', err);
+    const onError = (collection: string) => (err: unknown) => {
+      console.error(`[Firestore] Erreur collection "${collection}" :`, err);
+    };
 
-    const subExpenses = expenseService.getExpenses().subscribe({ next: expenses => dispatchBase({ type: 'SET_EXPENSES', payload: expenses }), error: noop });
-    const subMeetings = meetingService.getMeetings().subscribe({ next: meetings => dispatchBase({ type: 'SET_MEETINGS', payload: meetings }), error: noop });
-    const subRevenues = revenueService.getRevenues().subscribe({ next: revenues => dispatchBase({ type: 'SET_REVENUES', payload: revenues }), error: noop });
-    const subTeam     = teamService.getTeamMembers().subscribe({ next: members  => dispatchBase({ type: 'SET_TEAM_MEMBERS', payload: members }), error: noop });
-    const subProjects = projectService.getProjects().subscribe({ next: projects => dispatchBase({ type: 'SET_PROJECTS', payload: projects }), error: noop });
-    const subLeads    = leadService.getLeads().subscribe({ next: leads => dispatchBase({ type: 'SET_LEADS', payload: leads }), error: noop });
+    const subExpenses = expenseService.getExpenses().subscribe({ next: expenses => dispatchBase({ type: 'SET_EXPENSES', payload: expenses }), error: onError('expenses') });
+    const subMeetings = meetingService.getMeetings().subscribe({ next: meetings => dispatchBase({ type: 'SET_MEETINGS', payload: meetings }), error: onError('meetings') });
+    const subRevenues = revenueService.getRevenues().subscribe({ next: revenues => dispatchBase({ type: 'SET_REVENUES', payload: revenues }), error: onError('revenues') });
+    const subTeam     = teamService.getTeamMembers().subscribe({ next: members  => dispatchBase({ type: 'SET_TEAM_MEMBERS', payload: members }), error: onError('users') });
+    const subProjects = projectService.getProjects().subscribe({ next: projects => dispatchBase({ type: 'SET_PROJECTS', payload: projects }), error: onError('projects') });
+    const subLeads    = leadService.getLeads().subscribe({ next: leads => dispatchBase({ type: 'SET_LEADS', payload: leads }), error: onError('leads') });
 
     return () => {
       unsubTickets();
@@ -198,7 +201,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       subProjects.unsubscribe();
       subLeads.unsubscribe();
     };
-  }, [state.currentUser]);
+  }, [currentUserId]);
 
   // Initialize from localStorage
   useEffect(() => {

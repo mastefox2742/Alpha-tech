@@ -220,7 +220,7 @@ export default function EquipeView({ role }: { role: 'client' | 'staff' }) {
         }
       />
 
-      <div className="p-4 md:p-6 space-y-3">
+<div className="p-4 md:p-6 space-y-3">
         {state.teamMembers.length === 0 ? (
           <div className="text-center py-20 text-muted">
             <div className="text-5xl mb-4">👥</div>
