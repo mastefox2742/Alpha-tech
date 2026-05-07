@@ -2,23 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { GeneratedSummary } from '@/lib/types';
 
-let ai: GoogleGenAI | null = null;
+let client: GoogleGenAI | null = null;
 
 function getClient() {
-  if (!ai) {
+  if (!client) {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error('GEMINI_API_KEY non configurée');
     }
-    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
-  return ai;
+  return client;
 }
 
 export async function POST(req: NextRequest) {
   try {
     const { meetingTitle, agenda, participants, rawNotes } = await req.json();
 
-    const client = getClient();
+    const aiClient = getClient();
 
     const prompt = `Tu es l'assistante IA d'Alpha tech. Analyse les notes brutes de cette réunion et génère un compte rendu structuré.
 
@@ -48,12 +48,16 @@ Règles :
 - Pour les dates : si aucune date mentionnée, mets une date raisonnable dans 2 semaines
 - Réponds UNIQUEMENT avec le JSON valide, rien d'autre`;
 
-    const response = await client.models.generateContent({
-      model: 'gemini-2.0-flash',
+    const response = await aiClient.models.generateContent({
+      model: 'gemini-2.5-flash',
       contents: prompt,
+      config: {
+        maxOutputTokens: 1500,
+        responseMimeType: 'application/json',
+      },
     });
 
-    const text = response.text ?? '';
+    const text = response.text || '';
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const parsed: GeneratedSummary = JSON.parse(cleaned);
 
