@@ -12,7 +12,6 @@ import { teamService } from '@/lib/services/team.service';
 import { revenueService } from '@/lib/services/revenue.service';
 import { projectService } from '@/lib/services/project.service';
 import { leadService } from '@/lib/services/lead.service';
-import { notificationService } from '@/lib/services/notification.service';
 import { authService } from '@/lib/services/auth.service';
 import { UserRole } from '@/lib/types';
 
@@ -189,7 +188,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const subTeam     = teamService.getTeamMembers().subscribe({ next: members  => dispatchBase({ type: 'SET_TEAM_MEMBERS', payload: members }), error: noop });
     const subProjects = projectService.getProjects().subscribe({ next: projects => dispatchBase({ type: 'SET_PROJECTS', payload: projects }), error: noop });
     const subLeads    = leadService.getLeads().subscribe({ next: leads => dispatchBase({ type: 'SET_LEADS', payload: leads }), error: noop });
-    const subNotifs   = notificationService.getNotifications().subscribe({ next: notifs => dispatchBase({ type: 'SET_NOTIFICATIONS', payload: notifs }), error: noop });
 
     return () => {
       unsubTickets();
@@ -199,7 +197,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       subTeam.unsubscribe();
       subProjects.unsubscribe();
       subLeads.unsubscribe();
-      subNotifs.unsubscribe();
     };
   }, [state.currentUser]);
 
